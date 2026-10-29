@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Manrope", system-ui, sans-serif;
+
+  --color-ink-950: #0c0a10;
+  --color-ink-900: #13101a;
+  --color-ink-800: #1b1724;
+  --color-ink-700: #262031;
+  --color-line: #342d40;
+
+  --color-ivory: #ece8f0;
+  --color-mute: #8b8596;
+
+  --color-gold-300: #f0c24d;
+  --color-gold-400: #d9a22b;
+  --color-gold-500: #b8821a;
+
+  --color-aqua-400: #3fd6c6;
+  --color-rose-400: #f0728c;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink-950);
+  color: var(--color-ivory);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-gold-500);
+  color: var(--color-ink-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-400);
+  outline-offset: 2px;
+}
+
+.gold-text {
+  background: linear-gradient(
+    120deg,
+    var(--color-gold-300),
+    var(--color-gold-500)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gold-btn {
+  background: linear-gradient(
+    to bottom,
+    var(--color-gold-300),
+    var(--color-gold-500)
+  );
+  color: #1a1100;
+  box-shadow: 0 4px 14px -4px rgba(217, 162, 43, 0.4);
+  transition:
+    filter 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.gold-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px -6px rgba(217, 162, 43, 0.65);
+}
+
+.gold-btn:active {
+  transform: translateY(0);
+}
