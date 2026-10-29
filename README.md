@@ -164,23 +164,8 @@ ott-crm-platform/
 └── README.md
 ```
 
-## 9. Project Status
 
-| Deliverable | Status |
-|---|---|
-| Team allocation | Defined |
-| Technology stack | Defined |
-| Login page | Planned — 29 October 2026 |
-| Registration page | Planned — 29 October 2026 |
-| Responsive UI | Required |
-| Dashboard development | Pending |
-| Backend API integration | Pending |
-| MySQL schema implementation | Pending |
-| Testing and documentation | Pending |
-
-*Update this table as deliverables are implemented and verified.*
-
-
+**Frontend:** React.js + Tailwind CSS
  
 **Backend:** Java  
 **Database:** MySQL
