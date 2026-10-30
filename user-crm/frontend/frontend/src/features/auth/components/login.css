@@ -1,0 +1,143 @@
+
+@reference "tailwindcss";
+
+.login-heading {
+  @apply mb-8;
+}
+
+.login-eyebrow {
+  @apply text-[10px] font-semibold uppercase tracking-[0.2em];
+  color: #c5a464;
+}
+
+.login-subtitle {
+  @apply mt-2 text-sm;
+  color: #918b7e;
+}
+
+.login-form {
+  @apply flex flex-col gap-5;
+}
+
+.form-field label {
+  @apply mb-2 block text-xs font-medium;
+  color: #d4cdbf;
+}
+
+.password-label-row {
+  @apply flex items-center justify-between gap-3;
+}
+
+.password-label-row label {
+  @apply mb-2;
+}
+
+.login-input-wrap {
+  @apply relative flex h-12 items-center rounded-lg border transition-all;
+  background: #080808;
+  border-color: rgba(197, 164, 100, 0.2);
+}
+
+.login-input-wrap:hover {
+  border-color: rgba(197, 164, 100, 0.4);
+}
+
+.login-input-wrap:focus-within {
+  border-color: #c5a464;
+  box-shadow: 0 0 0 3px rgba(197, 164, 100, 0.09);
+}
+
+.login-input-wrap input {
+  @apply h-full w-full min-w-0 rounded-lg bg-transparent pl-11 pr-4 text-sm outline-none;
+  color: #f5f0e6;
+}
+
+.login-input-wrap input::placeholder {
+  color: #625e54;
+}
+
+.input-icon {
+  @apply pointer-events-none absolute left-4 shrink-0;
+  color: #a98c55;
+}
+
+.forgot-button {
+  @apply mb-2 text-xs font-medium transition-colors;
+  color: #c5a464;
+}
+
+.forgot-button:hover {
+  color: #e0c98f;
+}
+
+.forgot-button:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+.password-toggle {
+  @apply absolute right-3 flex items-center justify-center rounded p-1 transition-colors;
+  color: #827b6e;
+}
+
+.password-toggle:hover {
+  color: #d8bb7b;
+}
+
+.password-toggle:focus-visible {
+  @apply outline-none ring-2;
+  --tw-ring-color: rgba(197, 164, 100, 0.4);
+}
+
+.remember-row {
+  @apply flex cursor-pointer items-center gap-2.5 pt-0.5 text-xs;
+  color: #aaa394;
+}
+
+.remember-row input {
+  @apply h-4 w-4 rounded;
+  accent-color: #c5a464;
+}
+
+.login-submit {
+  @apply group flex h-12 w-full items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-all;
+  color: #090909;
+  background: linear-gradient(110deg, #b89451, #dfc487);
+}
+
+.login-submit:hover {
+  background: linear-gradient(110deg, #d0ae6b, #ead49d);
+  box-shadow: 0 5px 25px rgba(197, 164, 100, 0.16);
+  transform: translateY(-1px);
+}
+
+.login-submit:active {
+  transform: translateY(0);
+}
+
+.login-submit:disabled {
+  @apply cursor-not-allowed opacity-60;
+}
+
+.login-submit svg {
+  @apply transition-transform;
+}
+
+.login-submit:hover svg {
+  @apply translate-x-0.5;
+}
+
+.login-notice {
+  @apply rounded-lg border px-3 py-3 text-xs leading-5;
+}
+
+.login-notice.error {
+  @apply border-red-400/20;
+  background: rgba(248, 113, 113, 0.06);
+  color: #fecaca;
+}
+
+.login-notice.info {
+  border-color: rgba(197, 164, 100, 0.2);
+  background: rgba(197, 164, 100, 0.06);
+  color: #e0c98f;
+}

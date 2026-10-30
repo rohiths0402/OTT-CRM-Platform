@@ -1,0 +1,261 @@
+
+@reference "tailwindcss";
+
+.login-page {
+  @apply min-h-screen w-full overflow-hidden;
+  background: #000000;
+  color: #f5f0e6;
+}
+
+.login-shell {
+  @apply mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-8;
+}
+
+.login-header {
+  @apply flex items-center justify-between border-b py-7;
+  border-color: rgba(197, 164, 100, 0.16);
+}
+
+.loop-brand {
+  @apply flex items-center gap-3;
+}
+
+.brand-symbol {
+  @apply flex h-11 w-11 items-center justify-center rounded-xl;
+  color: #090909;
+  background: linear-gradient(135deg, #e0c98f, #a98749);
+  box-shadow: 0 0 30px rgba(197, 164, 100, 0.12);
+}
+
+.brand-name {
+  @apply text-xl font-bold tracking-[0.24em];
+  color: #f5f0e6;
+}
+
+.brand-caption {
+  @apply block text-[8px] tracking-[0.16em];
+  color: #918b7e;
+}
+
+.secure-label {
+  @apply flex items-center gap-2 text-[10px] font-semibold tracking-[0.16em];
+  color: #c5a464;
+}
+
+.login-layout {
+  @apply grid flex-1 items-center gap-16 py-16;
+  grid-template-columns: 1fr 440px;
+}
+
+.login-intro {
+  @apply relative flex flex-col justify-center;
+  min-height: 540px;
+}
+
+.intro-eyebrow {
+  @apply flex items-center gap-3 text-[10px] font-semibold tracking-[0.24em];
+  color: #c5a464;
+}
+
+.eyebrow-line {
+  @apply h-px w-9;
+  background: #c5a464;
+}
+
+.intro-title {
+  @apply mt-8 text-6xl font-medium leading-[1.12] tracking-[-0.055em];
+  color: #f5f0e6;
+}
+
+.intro-title span {
+  color: #c5a464;
+}
+
+.intro-description {
+  @apply mt-7 max-w-[440px] text-base leading-8;
+  color: #918b7e;
+}
+
+.intro-bottom {
+  @apply mt-16 flex items-center gap-7;
+}
+
+.intro-decoration {
+  @apply relative flex h-28 w-28 items-center justify-center;
+}
+
+.decoration-ring {
+  @apply absolute rounded-full;
+  border: 1px solid rgba(197, 164, 100, 0.3);
+}
+
+.ring-one {
+  @apply h-28 w-28;
+}
+
+.ring-two {
+  @apply h-20 w-20;
+  border-color: rgba(197, 164, 100, 0.5);
+}
+
+.decoration-center {
+  @apply flex h-14 w-14 items-center justify-center rounded-full;
+  color: #c5a464;
+  background: rgba(197, 164, 100, 0.08);
+}
+
+.intro-note span {
+  @apply text-[9px] font-semibold tracking-[0.2em];
+  color: #c5a464;
+}
+
+.intro-note p {
+  @apply mt-2 text-sm leading-6;
+  color: #b5ad9e;
+}
+
+.login-column {
+  @apply w-full;
+}
+
+.login-panel {
+  @apply rounded-2xl p-8;
+  background: linear-gradient(145deg, #11100d, #090909);
+  border: 1px solid rgba(197, 164, 100, 0.22);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.55);
+}
+
+.panel-topline {
+  @apply flex items-center justify-between border-b pb-5 text-[9px] font-semibold tracking-[0.16em];
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #827b6e;
+}
+
+.panel-indicator {
+  @apply flex items-center gap-2;
+  color: #a69b82;
+}
+
+.panel-indicator span {
+  @apply h-1.5 w-1.5 rounded-full;
+  background: #c5a464;
+  box-shadow: 0 0 10px rgba(197, 164, 100, 0.6);
+}
+
+.login-panel-heading {
+  @apply mb-8 mt-8;
+}
+
+.login-eyebrow {
+  @apply text-[10px] font-semibold tracking-[0.22em];
+  color: #c5a464;
+}
+
+.login-panel-heading h2 {
+  @apply mt-3 text-4xl font-medium tracking-[-0.05em];
+  color: #f5f0e6;
+}
+
+.login-panel-heading p {
+  @apply mt-3 text-sm leading-6;
+  color: #918b7e;
+}
+
+.login-security {
+  @apply mt-7 flex items-center justify-center gap-2 border-t pt-5 text-center text-[10px];
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #827b6e;
+}
+
+.login-security svg {
+  color: #c5a464;
+}
+
+.login-panel-footer {
+  @apply flex items-center justify-center gap-2 py-5 text-[10px];
+  color: #918b7e;
+}
+
+.login-panel-footer span:first-child {
+  color: #c5a464;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.login-panel-footer svg {
+  color: #c5a464;
+}
+
+.login-footer {
+  @apply flex items-center justify-between border-t py-6 text-[9px] tracking-[0.14em];
+  border-color: rgba(197, 164, 100, 0.16);
+  color: #716a5d;
+}
+
+@media (max-width: 900px) {
+  .login-layout {
+    grid-template-columns: 1fr 400px;
+    gap: 32px;
+  }
+
+  .intro-title {
+    @apply text-5xl;
+  }
+}
+
+@media (max-width: 700px) {
+  .login-shell {
+    @apply px-5;
+  }
+
+  .login-layout {
+    @apply grid-cols-1 gap-8 py-10;
+  }
+
+  .login-intro {
+    min-height: auto;
+  }
+
+  .intro-title {
+    @apply mt-5 text-5xl;
+  }
+
+  .intro-description {
+    @apply mt-4 text-sm;
+  }
+
+  .intro-bottom {
+    @apply hidden;
+  }
+
+  .login-column {
+    @apply mx-auto max-w-[440px];
+  }
+
+  .login-panel {
+    @apply p-6;
+  }
+
+  .login-footer {
+    @apply flex-wrap gap-3;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand-caption {
+    font-size: 7px;
+  }
+
+  .login-panel {
+    @apply p-5;
+  }
+
+  .intro-title {
+    @apply text-4xl;
+  }
+}
+
+.intro-title-highlight {
+  @apply block;
+  color: #c5a464;
+}
