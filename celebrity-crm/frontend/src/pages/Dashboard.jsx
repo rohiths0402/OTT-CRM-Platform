@@ -9,11 +9,13 @@ import {
   LogOut,
   Megaphone,
   Menu,
+  ShieldCheck,
   UserRound,
   Wallet,
   X,
 } from "lucide-react";
 import Logo from "../components/Logo";
+import ChangePasswordForm from "../components/ChangePasswordForm";
 import { useAuth } from "../context/AuthContext";
 
 const navItems = [
@@ -25,6 +27,7 @@ const navItems = [
   { icon: Clapperboard, label: "OTT projects" },
   { icon: Wallet, label: "Payments" },
   { icon: LineChart, label: "Analytics" },
+  { icon: ShieldCheck, label: "Security" },
 ];
 
 const stats = [
@@ -123,8 +126,8 @@ export default function Dashboard() {
                 }}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
                   isActive
-                    ? "bg-gold-400/10 text-gold-300"
-                    : "text-mute hover:bg-ink-800 hover:text-ivory"
+                    ? "bg-gold-400/15 text-gold-300"
+                    : "text-mute hover:bg-gold-400/10 hover:text-gold-300"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -164,79 +167,98 @@ export default function Dashboard() {
         </header>
 
         <main className="mx-auto max-w-6xl px-6 py-10">
-          <h1 className="font-display text-4xl font-light text-ivory">
-            Welcome back, {name}
-          </h1>
-          <p className="mt-2 text-sm text-mute">
-            Here is what needs your attention. Figures shown are sample data.
-          </p>
-
-          <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {stats.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl border border-line bg-ink-900 p-5"
-              >
-                <p className="text-sm text-mute">{item.label}</p>
-                <p className="mt-2 font-display text-4xl text-gold-300">
-                  {item.value}
-                </p>
-                <p className="mt-2 text-xs text-mute">{item.note}</p>
+          {active === "Security" ? (
+            <>
+              <h1 className="font-display text-4xl font-light text-ivory">
+                Security
+              </h1>
+              <p className="mt-2 text-sm text-mute">
+                Change the password you use to sign in with your email.
+              </p>
+              <div className="mt-8 rounded-2xl border border-line bg-ink-900 p-6 sm:p-8">
+                <ChangePasswordForm />
               </div>
-            ))}
-          </section>
+            </>
+          ) : (
+            <>
+              <h1 className="font-display text-4xl font-light text-ivory">
+                Welcome back, {name}
+              </h1>
+              <p className="mt-2 text-sm text-mute">
+                Here is what needs your attention. Figures shown are sample
+                data.
+              </p>
 
-          <section className="mt-6 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-line bg-ink-900 p-6">
-              <h2 className="text-base font-semibold text-ivory">
-                Upcoming schedule
-              </h2>
-              <ul className="mt-5 divide-y divide-line">
-                {schedule.map((item) => (
-                  <li
-                    key={item.title}
-                    className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
+              <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {stats.map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-line bg-ink-900 p-5 transition duration-200 hover:-translate-y-0.5 hover:border-gold-400/50"
                   >
-                    <div>
-                      <p className="text-sm text-ivory">{item.title}</p>
-                      <p className="mt-0.5 text-xs text-mute">
-                        {item.place}, {item.when}
-                      </p>
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full border px-3 py-1 text-xs ${statusStyle[item.status]}`}
-                    >
-                      {item.status}
-                    </span>
-                  </li>
+                    <p className="text-sm text-mute">{item.label}</p>
+                    <p className="mt-2 font-display text-4xl text-gold-300">
+                      {item.value}
+                    </p>
+                    <p className="mt-2 text-xs text-mute">{item.note}</p>
+                  </div>
                 ))}
-              </ul>
-            </div>
+              </section>
 
-            <div className="rounded-2xl border border-line bg-ink-900 p-6">
-              <h2 className="text-base font-semibold text-ivory">Payments</h2>
-              <ul className="mt-5 divide-y divide-line">
-                {payments.map((item) => (
-                  <li
-                    key={item.from}
-                    className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
-                  >
-                    <div>
-                      <p className="text-sm text-ivory">{item.from}</p>
-                      <p className="mt-0.5 text-xs text-mute">
-                        Rs. {item.amount}
-                      </p>
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full border px-3 py-1 text-xs ${statusStyle[item.status]}`}
-                    >
-                      {item.status}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
+              <section className="mt-6 grid gap-6 lg:grid-cols-2">
+                <div className="rounded-2xl border border-line bg-ink-900 p-6">
+                  <h2 className="text-base font-semibold text-ivory">
+                    Upcoming schedule
+                  </h2>
+                  <ul className="mt-5 divide-y divide-line">
+                    {schedule.map((item) => (
+                      <li
+                        key={item.title}
+                        className="-mx-3 flex items-center justify-between gap-4 rounded-lg px-3 py-4 transition hover:bg-gold-400/5"
+                      >
+                        <div>
+                          <p className="text-sm text-ivory">{item.title}</p>
+                          <p className="mt-0.5 text-xs text-mute">
+                            {item.place}, {item.when}
+                          </p>
+                        </div>
+                        <span
+                          className={`shrink-0 rounded-full border px-3 py-1 text-xs ${statusStyle[item.status]}`}
+                        >
+                          {item.status}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="rounded-2xl border border-line bg-ink-900 p-6">
+                  <h2 className="text-base font-semibold text-ivory">
+                    Payments
+                  </h2>
+                  <ul className="mt-5 divide-y divide-line">
+                    {payments.map((item) => (
+                      <li
+                        key={item.from}
+                        className="-mx-3 flex items-center justify-between gap-4 rounded-lg px-3 py-4 transition hover:bg-gold-400/5"
+                      >
+                        <div>
+                          <p className="text-sm text-ivory">{item.from}</p>
+                          <p className="mt-0.5 text-xs text-mute">
+                            Rs. {item.amount}
+                          </p>
+                        </div>
+                        <span
+                          className={`shrink-0 rounded-full border px-3 py-1 text-xs ${statusStyle[item.status]}`}
+                        >
+                          {item.status}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            </>
+          )}
         </main>
       </div>
     </div>

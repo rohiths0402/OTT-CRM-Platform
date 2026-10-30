@@ -5,9 +5,8 @@ import { FcGoogle } from "react-icons/fc";
 import {
   ArrowLeft,
   CalendarClock,
+  Check,
   Crown,
-  Eye,
-  EyeOff,
   FileSignature,
   Loader2,
   Lock,
@@ -15,9 +14,18 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
+import ForgotPassword from "../components/ForgotPassword";
 import OtpInput from "../components/OtpInput";
+import PasswordField from "../components/PasswordField";
 import { googleLogin, passwordLogin, sendOtp, verifyOtp } from "../api/authApi";
 import { useAuth } from "../context/AuthContext";
+import {
+  errorClass,
+  fieldWrapper,
+  inputClass,
+  labelClass,
+  primaryButton,
+} from "../styles/formStyles";
 
 const highlights = [
   { icon: FileSignature, text: "Contracts and endorsements in one place" },
@@ -26,21 +34,59 @@ const highlights = [
 ];
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_KEY = "aurum_remembered_email";
 
-const primaryButton =
-  "flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-[#f1d9a6] to-[#d9b36c] py-3.5 text-sm font-semibold text-[#1a1408] transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8c98f]/60 disabled:cursor-not-allowed disabled:opacity-40";
+const readRememberedEmail = () => {
+  try {
+    return localStorage.getItem(EMAIL_KEY) || "";
+  } catch {
+    return "";
+  }
+};
 
-const fieldWrapper =
-  "flex overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] transition focus-within:border-[#e8c98f] focus-within:ring-2 focus-within:ring-[#e8c98f]/30";
+const storeRememberedEmail = (email, remember) => {
+  try {
+    if (remember) localStorage.setItem(EMAIL_KEY, email);
+    else localStorage.removeItem(EMAIL_KEY);
+  } catch {
+    return;
+  }
+};
+
+function RememberMe({ checked, onChange }) {
+  return (
+    <label className="group flex cursor-pointer items-center gap-2.5 text-sm text-[#a39cb0] transition hover:text-[#ece8f0]">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer sr-only"
+      />
+      <span
+        className={`flex h-[18px] w-[18px] items-center justify-center rounded-md border transition peer-focus-visible:ring-2 peer-focus-visible:ring-[#d9a22b]/60 ${
+          checked
+            ? "border-[#d9a22b] bg-[#d9a22b]"
+            : "border-white/20 bg-white/[0.04] group-hover:border-[#d9a22b]/60"
+        }`}
+      >
+        {checked && (
+          <Check className="h-3 w-3 text-[#1a1100]" strokeWidth={3} />
+        )}
+      </span>
+      Remember me
+    </label>
+  );
+}
 
 export default function Login() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
+  const [view, setView] = useState("signin");
   const [method, setMethod] = useState("password");
   const [step, setStep] = useState("form");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(readRememberedEmail);
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(() => readRememberedEmail() !== "");
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(0);
@@ -63,6 +109,12 @@ export default function Login() {
     setError("");
   };
 
+  const openForgot = () => {
+    setError("");
+    setPassword("");
+    setView("forgot");
+  };
+
   const handlePasswordLogin = async (e) => {
     e.preventDefault();
     if (!emailPattern.test(email.trim())) {
@@ -76,8 +128,9 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const { data } = await passwordLogin(email.trim(), password);
-      signIn(data.user);
+      const { data } = await passwordLogin(email.trim(), password, remember);
+      storeRememberedEmail(email.trim(), remember);
+      signIn(data.user, remember);
       navigate("/dashboard");
     } catch (err) {
       setError(
@@ -140,8 +193,8 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const { data } = await verifyOtp(mobile, otp);
-      signIn(data.user);
+      const { data } = await verifyOtp(mobile, otp, remember);
+      signIn(data.user, remember);
       navigate("/dashboard");
     } catch (err) {
       setError(
@@ -160,8 +213,8 @@ export default function Login() {
       setError("");
       setLoading(true);
       try {
-        const { data } = await googleLogin(code);
-        signIn(data.user);
+        const { data } = await googleLogin(code, remember);
+        signIn(data.user, remember);
         navigate("/dashboard");
       } catch (err) {
         setError(
@@ -182,10 +235,10 @@ export default function Login() {
   };
 
   const tabClass = (value) =>
-    `flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8c98f]/50 ${
+    `flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d9a22b]/50 ${
       method === value
-        ? "bg-[#e8c98f]/12 font-semibold text-[#f1d9a6]"
-        : "text-[#8b8596] hover:text-[#ece8f0]"
+        ? "bg-[#d9a22b]/15 font-semibold text-[#f0c24d]"
+        : "text-[#8b8596] hover:bg-white/[0.04] hover:text-[#ece8f0]"
     }`;
 
   return (
@@ -195,7 +248,7 @@ export default function Login() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 70% 55% at 30% 0%, rgba(232,201,143,0.22), transparent 70%), radial-gradient(ellipse 60% 50% at 90% 100%, rgba(139,92,246,0.14), transparent 70%)",
+              "radial-gradient(ellipse 70% 55% at 30% 0%, rgba(217,162,43,0.26), transparent 70%), radial-gradient(ellipse 60% 50% at 90% 100%, rgba(139,92,246,0.14), transparent 70%)",
           }}
         />
         <div
@@ -207,8 +260,8 @@ export default function Login() {
         />
 
         <div className="relative flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e8c98f]/40 bg-[#e8c98f]/10">
-            <Crown className="h-5 w-5 text-[#e8c98f]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#d9a22b]/40 bg-[#d9a22b]/10">
+            <Crown className="h-5 w-5 text-[#d9a22b]" />
           </div>
           <span className="font-['Fraunces'] text-xl tracking-wide text-[#f1e6d0]">
             Celebrity Suite
@@ -227,10 +280,10 @@ export default function Login() {
             {highlights.map(({ icon: Icon, text }) => (
               <li
                 key={text}
-                className="flex items-center gap-3 text-sm text-[#cfc8da]"
+                className="group flex items-center gap-3 text-sm text-[#cfc8da] transition hover:translate-x-1 hover:text-[#f6efe0]"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03]">
-                  <Icon className="h-4 w-4 text-[#e8c98f]" />
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] transition group-hover:border-[#d9a22b]/60 group-hover:bg-[#d9a22b]/15">
+                  <Icon className="h-4 w-4 text-[#d9a22b]" />
                 </span>
                 {text}
               </li>
@@ -246,20 +299,22 @@ export default function Login() {
       <main className="flex flex-1 items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <div className="mb-10 flex items-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#e8c98f]/40 bg-[#e8c98f]/10">
-              <Crown className="h-5 w-5 text-[#e8c98f]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#d9a22b]/40 bg-[#d9a22b]/10">
+              <Crown className="h-5 w-5 text-[#d9a22b]" />
             </div>
             <span className="font-['Fraunces'] text-xl text-[#f1e6d0]">
               Celebrity Suite
             </span>
           </div>
 
-          {step === "otp" ? (
+          {view === "forgot" ? (
+            <ForgotPassword onBack={() => setView("signin")} />
+          ) : step === "otp" ? (
             <>
               <button
                 type="button"
                 onClick={goBack}
-                className="mb-8 flex items-center gap-2 text-sm text-[#8b8596] transition hover:text-[#ece8f0] focus:outline-none focus-visible:text-[#e8c98f]"
+                className="mb-8 flex items-center gap-2 text-sm text-[#8b8596] transition hover:text-[#ece8f0] focus:outline-none focus-visible:text-[#d9a22b]"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Change number
@@ -299,7 +354,7 @@ export default function Login() {
                       type="button"
                       onClick={handleResend}
                       disabled={loading}
-                      className="text-[#e8c98f] underline-offset-4 hover:underline focus:outline-none focus-visible:underline"
+                      className="text-[#d9a22b] underline-offset-4 transition hover:text-[#f0c24d] hover:underline focus:outline-none focus-visible:underline"
                     >
                       Resend code
                     </button>
@@ -320,7 +375,7 @@ export default function Login() {
                 type="button"
                 onClick={() => handleGoogle()}
                 disabled={loading}
-                className="mt-8 flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] py-3.5 text-sm font-medium text-[#ece8f0] transition hover:border-white/20 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#e8c98f]/50 disabled:opacity-50"
+                className="mt-8 flex w-full items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] py-3.5 text-sm font-medium text-[#ece8f0] transition hover:-translate-y-0.5 hover:border-[#d9a22b]/60 hover:bg-white/[0.08] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d9a22b]/50 disabled:opacity-50"
               >
                 <FcGoogle className="h-5 w-5" />
                 Continue with Google
@@ -360,10 +415,7 @@ export default function Login() {
 
               {method === "password" ? (
                 <form onSubmit={handlePasswordLogin} noValidate>
-                  <label
-                    htmlFor="email"
-                    className="mb-2 block text-sm text-[#a39cb0]"
-                  >
+                  <label htmlFor="email" className={labelClass}>
                     Email address
                   </label>
                   <div className={fieldWrapper}>
@@ -377,47 +429,33 @@ export default function Login() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@gmail.com"
-                      className="w-full bg-transparent px-4 py-3.5 text-base text-[#f1e6d0] placeholder-[#5a5468] outline-none"
+                      className={inputClass}
                     />
                   </div>
 
-                  <label
-                    htmlFor="password"
-                    className="mb-2 mt-5 block text-sm text-[#a39cb0]"
-                  >
-                    Password
-                  </label>
-                  <div className={fieldWrapper}>
-                    <span className="flex items-center border-r border-white/10 px-4 text-[#a39cb0]">
-                      <Lock className="h-4 w-4" />
-                    </span>
-                    <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Password from your admin"
-                      className="w-full bg-transparent px-4 py-3.5 text-base text-[#f1e6d0] placeholder-[#5a5468] outline-none"
-                    />
+                  <PasswordField
+                    id="password"
+                    label="Password"
+                    value={password}
+                    onChange={setPassword}
+                    placeholder="Password from your admin"
+                    autoComplete="current-password"
+                    className="mt-5"
+                  />
+
+                  <div className="mt-4 flex items-center justify-between gap-4">
+                    <RememberMe checked={remember} onChange={setRemember} />
                     <button
                       type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
-                      className="flex items-center px-4 text-[#8b8596] transition hover:text-[#ece8f0] focus:outline-none focus-visible:text-[#e8c98f]"
+                      onClick={openForgot}
+                      className="text-sm text-[#d9a22b] underline-offset-4 transition hover:text-[#f0c24d] hover:underline focus:outline-none focus-visible:underline"
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      Forgot password?
                     </button>
                   </div>
 
                   {error && (
-                    <p role="alert" className="mt-3 text-sm text-rose-400">
+                    <p role="alert" className={errorClass}>
                       {error}
                     </p>
                   )}
@@ -433,10 +471,7 @@ export default function Login() {
                 </form>
               ) : (
                 <form onSubmit={handleSendOtp} noValidate>
-                  <label
-                    htmlFor="mobile"
-                    className="mb-2 block text-sm text-[#a39cb0]"
-                  >
+                  <label htmlFor="mobile" className={labelClass}>
                     Mobile number
                   </label>
                   <div className={fieldWrapper}>
@@ -455,12 +490,16 @@ export default function Login() {
                         setMobile(e.target.value.replace(/\D/g, ""))
                       }
                       placeholder="98765 43210"
-                      className="w-full bg-transparent px-4 py-3.5 text-base tracking-wider text-[#f1e6d0] placeholder-[#5a5468] outline-none"
+                      className={`${inputClass} tracking-wider`}
                     />
                   </div>
 
+                  <div className="mt-4">
+                    <RememberMe checked={remember} onChange={setRemember} />
+                  </div>
+
                   {error && (
-                    <p role="alert" className="mt-3 text-sm text-rose-400">
+                    <p role="alert" className={errorClass}>
                       {error}
                     </p>
                   )}

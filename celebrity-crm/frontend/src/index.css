@@ -13,9 +13,9 @@
   --color-ivory: #ece8f0;
   --color-mute: #8b8596;
 
-  --color-gold-300: #f1d9a6;
-  --color-gold-400: #e8c98f;
-  --color-gold-500: #d9b36c;
+  --color-gold-300: #f0c24d;
+  --color-gold-400: #d9a22b;
+  --color-gold-500: #b8821a;
 
   --color-aqua-400: #3fd6c6;
   --color-rose-400: #f0728c;
@@ -46,26 +46,25 @@ body {
 }
 
 .gold-text {
-  background: linear-gradient(
-    120deg,
-    var(--color-gold-300),
-    var(--color-gold-500)
-  );
+  background: linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .gold-btn {
-  background: linear-gradient(
-    to bottom,
-    var(--color-gold-300),
-    var(--color-gold-500)
-  );
-  color: #1a1408;
-  transition: filter 0.2s;
+  background: linear-gradient(to bottom, var(--color-gold-300), var(--color-gold-500));
+  color: #1a1100;
+  box-shadow: 0 4px 14px -4px rgba(217, 162, 43, 0.4);
+  transition: filter 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
-.gold-btn:hover {
+.gold-btn:hover:not(:disabled) {
   filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px -6px rgba(217, 162, 43, 0.65);
+}
+
+.gold-btn:active:not(:disabled) {
+  transform: translateY(0);
 }

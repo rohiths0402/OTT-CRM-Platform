@@ -5,8 +5,8 @@ React + Vite + Tailwind CSS v4.
 ## Setup
 
 ```
-npm create vite@latest . -- --template react
-npm install react-router-dom lucide-react react-icons axios @react-oauth/google
+npm install
+npm install react-router-dom lucide-react react-icons axios @react-oauth/google firebase
 npm install tailwindcss @tailwindcss/vite
 cp .env.example .env
 npm run dev
@@ -16,16 +16,33 @@ Open http://localhost:5173
 
 ## Mock mode
 
-`VITE_USE_MOCK=true` skips the backend. Use any 10 digit mobile number starting 6-9 and OTP `123456`.
-Email login: any valid email with password `Celeb@123`.
-Google button works in mock mode too once `VITE_GOOGLE_CLIENT_ID` is set.
+`VITE_USE_MOCK=true` skips the backend and Firebase.
 
-## Backend contract (for the Spring Boot developer)
+- Email login: any valid email with password `Celeb@123`
+- Mobile OTP and forgot password OTP: any valid number or email, code `123456`
 
-- POST /auth/login { email, password } -> { user } and sets an httpOnly session cookie
-- POST /auth/otp/send { mobile } -> 200
-- POST /auth/otp/verify { mobile, otp } -> { user } and sets an httpOnly session cookie
-- POST /auth/google { code } -> { user } and sets an httpOnly session cookie
-- POST /auth/logout -> 200
+Set `VITE_USE_MOCK=false` and fill the Firebase and Google values to use the real backend.
 
-Only invited celebrities and managers should be allowed to sign in. Return `{ "message": "..." }` on errors.
+## Backend contract
+
+Every login request also carries `rememberMe` (boolean). When true, issue a long lived cookie (for example 30 days), otherwise a session cookie.
+
+- POST /auth/login           { email, password, rememberMe }   -> { user } + httpOnly cookie
+- POST /auth/otp/firebase    { idToken, rememberMe }           -> { user } + httpOnly cookie
+- POST /auth/google          { code, rememberMe }              -> { user } + httpOnly cookie
+- POST /auth/logout                                            -> 200
+
+Forgot password:
+
+- POST /auth/password/forgot { identifier, channel }           -> 200 if the account exists in the database. channel is EMAIL or MOBILE. For EMAIL the backend emails a 6 digit code. For MOBILE the frontend sends the SMS through Firebase after this check passes.
+- POST /auth/password/verify { channel, identifier, otp }      -> { resetToken } for EMAIL
+- POST /auth/password/verify { channel, identifier, idToken }  -> { resetToken } for MOBILE (verify the Firebase token and match the phone number)
+- POST /auth/password/reset  { resetToken, newPassword }       -> 200. Validate the rules again on the server, store a BCrypt hash, end old sessions.
+
+Change password (signed in, from the Security tab):
+
+- POST /auth/password/change { currentPassword, newPassword } -> 200. Check the current password, validate the rules, store a BCrypt hash.
+
+Password rules: at least 6 characters, one capital letter, one number, one special character.
+
+Errors return `{ "message": "..." }` and the message is shown to the user.

@@ -47,7 +47,7 @@ export default function Landing() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 15% 0%, rgba(232,201,143,0.18), transparent 70%), radial-gradient(ellipse 50% 45% at 95% 90%, rgba(63,214,198,0.08), transparent 70%)",
+            "radial-gradient(ellipse 60% 50% at 15% 0%, rgba(217,162,43,0.22), transparent 70%), radial-gradient(ellipse 50% 45% at 95% 90%, rgba(63,214,198,0.08), transparent 70%)",
         }}
       />
 
@@ -74,7 +74,7 @@ export default function Landing() {
             {modules.map(({ icon: Icon, label }) => (
               <li
                 key={label}
-                className="flex items-center gap-2 rounded-full border border-line bg-ink-900 px-4 py-2 text-sm text-ivory"
+                className="flex items-center gap-2 rounded-full border border-line bg-ink-900 px-4 py-2 text-sm text-ivory transition duration-200 hover:-translate-y-0.5 hover:border-gold-400/70 hover:bg-gold-400/10 hover:text-gold-300"
               >
                 <Icon className="h-4 w-4 text-gold-400" />
                 {label}
@@ -95,7 +95,7 @@ export default function Landing() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-2xl border border-line bg-ink-800 p-4"
+                className="rounded-2xl border border-line bg-ink-800 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-gold-400/50"
               >
                 <p className="font-display text-3xl text-gold-300">
                   {item.value}
@@ -111,7 +111,7 @@ export default function Landing() {
               {upcoming.map((item) => (
                 <li
                   key={item.title}
-                  className="flex items-start justify-between gap-4"
+                  className="-mx-2 flex items-start justify-between gap-4 rounded-lg px-2 py-1.5 transition hover:bg-gold-400/10"
                 >
                   <div>
                     <p className="text-sm text-ivory">{item.title}</p>
