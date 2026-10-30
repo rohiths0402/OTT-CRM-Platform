@@ -27,6 +27,31 @@ public class AuthController {
         return Map.of("user", service.login(body.email(), body.password(), request, response));
     }
 
+    @PostMapping("/password/forgot")
+    public Map<String, Boolean> forgotPassword(@Valid @RequestBody PasswordForgotRequest body) {
+        service.forgotPassword(body.channel(), body.identifier());
+        return Map.of("sent", true);
+    }
+
+    @PostMapping("/password/verify")
+    public Map<String, String> verifyReset(@Valid @RequestBody PasswordVerifyRequest body) {
+        String token = service.verifyReset(body.channel(), body.identifier(), body.otp(), body.idToken());
+        return Map.of("resetToken", token);
+    }
+
+    @PostMapping("/password/reset")
+    public Map<String, Boolean> resetPassword(@Valid @RequestBody PasswordResetRequest body) {
+        service.resetPassword(body.resetToken(), body.newPassword());
+        return Map.of("reset", true);
+    }
+
+    @PostMapping("/password/change")
+    public Map<String, Boolean> changePassword(@Valid @RequestBody PasswordChangeRequest body,
+                                               Authentication authentication) {
+        service.changePassword(authentication.getName(), body.currentPassword(), body.newPassword());
+        return Map.of("changed", true);
+    }
+
     @PostMapping("/otp/send")
     public Map<String, Boolean> sendOtp(@Valid @RequestBody SendOtpRequest body) {
         service.sendOtp(body.mobile().trim());
