@@ -5,6 +5,7 @@ import com.example.celebrity_crm.contract.dto.ContractResponse;
 import com.example.celebrity_crm.contract.dto.SignRequest;
 import com.example.celebrity_crm.contract.model.Contract;
 import com.example.celebrity_crm.contract.repository.ContractRepository;
+import com.example.celebrity_crm.notification.service.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,9 +21,11 @@ public class ContractService {
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
 
     private final ContractRepository repository;
+    private final NotificationService notifications;
 
-    public ContractService(ContractRepository repository) {
+    public ContractService(ContractRepository repository, NotificationService notifications) {
         this.repository = repository;
+        this.notifications = notifications;
     }
 
     public List<ContractResponse> list(Long userId) {
@@ -59,7 +62,10 @@ public class ContractService {
         contract.setSignedAt(LocalDate.now());
         contract.setUpdatedOn(LocalDate.now());
         contract.setActionNote("A signed copy is ready in your project records.");
-        return toResponse(repository.save(contract));
+        Contract saved = repository.save(contract);
+        notifications.add(userId, "Contract signed",
+                "You signed " + saved.getTitle() + " with " + saved.getParty() + ".", "contracts");
+        return toResponse(saved);
     }
 
     public void delete(Long userId, Long id) {

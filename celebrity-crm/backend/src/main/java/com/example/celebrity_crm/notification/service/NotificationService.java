@@ -26,6 +26,15 @@ public class NotificationService {
                 .toList();
     }
 
+    public void add(Long userId, String title, String message, String target) {
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setTarget(target);
+        repository.save(notification);
+    }
+
     public NotificationResponse markRead(Long userId, Long id) {
         Notification notification = repository.findById(id)
                 .filter(n -> n.getUserId().equals(userId))

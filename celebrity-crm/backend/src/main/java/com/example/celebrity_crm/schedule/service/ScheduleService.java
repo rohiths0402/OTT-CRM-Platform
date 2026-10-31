@@ -1,5 +1,6 @@
 package com.example.celebrity_crm.schedule.service;
 
+import com.example.celebrity_crm.notification.service.NotificationService;
 import com.example.celebrity_crm.project.service.OfferProjectService;
 import com.example.celebrity_crm.schedule.dto.ScheduleRequest;
 import com.example.celebrity_crm.schedule.dto.ScheduleResponse;
@@ -22,10 +23,13 @@ public class ScheduleService {
 
     private final ScheduleEventRepository repository;
     private final OfferProjectService offerProjects;
+    private final NotificationService notifications;
 
-    public ScheduleService(ScheduleEventRepository repository, OfferProjectService offerProjects) {
+    public ScheduleService(ScheduleEventRepository repository, OfferProjectService offerProjects,
+                           NotificationService notifications) {
         this.repository = repository;
         this.offerProjects = offerProjects;
+        this.notifications = notifications;
     }
 
     public List<ScheduleResponse> list(Long userId) {
@@ -52,9 +56,13 @@ public class ScheduleService {
         ScheduleEvent event = waiting(userId, id);
         event.setResponse("accepted");
         event = repository.save(event);
-        if (event.getTotalAmount() > 0) {
+        boolean newProject = event.getTotalAmount() > 0;
+        if (newProject) {
             offerProjects.addFromEvent(userId, event);
         }
+        notifications.add(userId, "Offer accepted",
+                "You accepted " + offerName(event) + (newProject ? ". It is now in your projects." : "."),
+                newProject ? "projects" : "schedule");
         return toResponse(event);
     }
 
@@ -62,7 +70,9 @@ public class ScheduleService {
     public ScheduleResponse decline(Long userId, Long id) {
         ScheduleEvent event = waiting(userId, id);
         event.setResponse("declined");
-        return toResponse(repository.save(event));
+        event = repository.save(event);
+        notifications.add(userId, "Offer declined", "You declined " + offerName(event) + ".", "schedule");
+        return toResponse(event);
     }
 
     public void delete(Long userId, Long id) {
@@ -81,6 +91,11 @@ public class ScheduleService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This offer was already answered.");
         }
         return event;
+    }
+
+    private String offerName(ScheduleEvent event) {
+        String name = event.getProjectName() != null ? event.getProjectName() : event.getTitle();
+        return event.getCompany() == null ? name : name + " from " + event.getCompany();
     }
 
     private void fill(ScheduleEvent event, ScheduleRequest request) {

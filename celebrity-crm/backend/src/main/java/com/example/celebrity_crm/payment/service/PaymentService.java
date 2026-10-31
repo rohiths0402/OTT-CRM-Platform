@@ -1,5 +1,6 @@
 package com.example.celebrity_crm.payment.service;
 
+import com.example.celebrity_crm.notification.service.NotificationService;
 import com.example.celebrity_crm.payment.dto.PaymentResponse;
 import com.example.celebrity_crm.payment.dto.SentPaymentRequest;
 import com.example.celebrity_crm.payment.dto.SentPaymentResponse;
@@ -20,10 +21,13 @@ public class PaymentService {
 
     private final PaymentRepository payments;
     private final SentPaymentRepository sentPayments;
+    private final NotificationService notifications;
 
-    public PaymentService(PaymentRepository payments, SentPaymentRepository sentPayments) {
+    public PaymentService(PaymentRepository payments, SentPaymentRepository sentPayments,
+                          NotificationService notifications) {
         this.payments = payments;
         this.sentPayments = sentPayments;
+        this.notifications = notifications;
     }
 
     public List<PaymentResponse> list(Long userId) {
@@ -52,7 +56,11 @@ public class PaymentService {
         if (payment.getReceivedAmount() >= payment.getAmount()) {
             payment.setStatus("received");
         }
-        return toResponse(payments.save(payment));
+        Payment saved = payments.save(payment);
+        notifications.add(userId, "Payment received",
+                "₹" + request.amount() + " received from " + saved.getPayer() + " for " + saved.getProject() + ".",
+                "payments");
+        return toResponse(saved);
     }
 
     public List<SentPaymentResponse> sentList(Long userId) {
@@ -69,7 +77,10 @@ public class PaymentService {
         sent.setAmount(request.amount());
         sent.setNote(request.note() == null || request.note().isBlank() ? "Personal payment" : request.note().trim());
         sent.setReference(request.reference().trim());
-        return toSentResponse(sentPayments.save(sent));
+        SentPayment saved = sentPayments.save(sent);
+        notifications.add(userId, "Payment sent",
+                "₹" + saved.getAmount() + " sent to " + saved.getRecipient() + ".", "payments");
+        return toSentResponse(saved);
     }
 
     private PaymentResponse toResponse(Payment p) {

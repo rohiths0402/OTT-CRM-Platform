@@ -4,6 +4,7 @@ import com.example.celebrity_crm.deal.dto.DealRequest;
 import com.example.celebrity_crm.deal.dto.DealResponse;
 import com.example.celebrity_crm.deal.model.Deal;
 import com.example.celebrity_crm.deal.repository.DealRepository;
+import com.example.celebrity_crm.notification.service.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,9 +19,11 @@ public class DealService {
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
 
     private final DealRepository repository;
+    private final NotificationService notifications;
 
-    public DealService(DealRepository repository) {
+    public DealService(DealRepository repository, NotificationService notifications) {
         this.repository = repository;
+        this.notifications = notifications;
     }
 
     public List<DealResponse> list(Long userId) {
@@ -38,7 +41,10 @@ public class DealService {
         deal.setContact("Add a brand contact");
         deal.setNextStep("Confirm the brief and deliverables");
         fill(deal, request);
-        return toResponse(repository.save(deal));
+        Deal saved = repository.save(deal);
+        notifications.add(userId, "New brand deal",
+                saved.getBrand() + " - " + saved.getCampaign() + " was added to your deals.", "deals");
+        return toResponse(saved);
     }
 
     public DealResponse update(Long userId, Long id, DealRequest request) {
