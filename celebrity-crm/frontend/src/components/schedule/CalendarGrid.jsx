@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { eventTypes } from "../../data/schedule";
+import { chipStyle, dotFor } from "../../utils/offer";
 import { formatMonth, isSameDay, monthGrid } from "../../utils/dates";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -100,7 +100,7 @@ export default function CalendarGrid({
                 {list.slice(0, 3).map((event) => (
                   <span
                     key={event.id}
-                    className={`h-1.5 w-1.5 rounded-full ${eventTypes[event.type].dot}`}
+                    className={`h-1.5 w-1.5 rounded-full ${dotFor(event)}`}
                   />
                 ))}
               </span>
@@ -109,10 +109,10 @@ export default function CalendarGrid({
                 {list.slice(0, 2).map((event) => (
                   <span
                     key={event.id}
-                    className="flex min-w-0 items-center gap-1.5 rounded-md bg-white/[0.05] px-1.5 py-1 text-[10px] leading-none text-ivory"
+                    className={`flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-[10px] leading-none ${chipStyle(event)}`}
                   >
                     <span
-                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${eventTypes[event.type].dot}`}
+                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotFor(event)}`}
                     />
                     <span className="truncate">
                       {shortTime(event.callTime)} {event.title}

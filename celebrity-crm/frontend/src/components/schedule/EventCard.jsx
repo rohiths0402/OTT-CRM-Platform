@@ -1,13 +1,19 @@
+import { useState } from "react";
 import {
+  Building2,
   Car,
+  Check,
   Info,
   MapPin,
   Navigation,
   Phone,
   Shirt,
   StickyNote,
+  X,
 } from "lucide-react";
-import { eventTypes, statusStyles } from "../../data/schedule";
+import { eventTypes } from "../../data/schedule";
+import { formatMoney } from "../../utils/format";
+import { dotFor, isDeclined, statusFor } from "../../utils/offer";
 
 const timeLabels = { shoot: "Call time", travel: "Departs" };
 const endLabels = { shoot: "Pack up", travel: "Arrives" };
@@ -43,16 +49,33 @@ function ActionLink({ href, icon: Icon, external = false, children }) {
   );
 }
 
-export default function EventCard({ event }) {
+export default function EventCard({ event, onRespond }) {
+  const [busy, setBusy] = useState("");
   const type = eventTypes[event.type];
-  const status = statusStyles[event.status];
+  const status = statusFor(event);
+  const declined = isDeclined(event);
   const TypeIcon = type.icon;
   const place = [event.location, event.city].filter(Boolean).join(", ");
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
 
+  const answer = async (action) => {
+    setBusy(action);
+    try {
+      await onRespond(event.id, action);
+    } finally {
+      setBusy("");
+    }
+  };
+
   return (
-    <article className="overflow-hidden rounded-3xl border border-line bg-ink-900 transition duration-200 hover:border-gold-400/30">
-      <div className={`h-1 ${type.dot}`} />
+    <article
+      className={`overflow-hidden rounded-3xl border bg-ink-900 transition duration-200 ${
+        declined
+          ? "border-rose-500/40"
+          : "border-line hover:border-gold-400/30"
+      }`}
+    >
+      <div className={`h-1 ${dotFor(event)}`} />
       <div className="p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span
@@ -72,6 +95,13 @@ export default function EventCard({ event }) {
           {event.title}
         </h4>
         <p className="mt-1 text-sm text-mute">{event.project}</p>
+
+        {declined && (
+          <p className="mt-4 flex items-start gap-2 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+            <X className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            You declined this offer.
+          </p>
+        )}
 
         {event.statusNote && (
           <p className="mt-4 flex items-start gap-2 rounded-xl border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-xs text-rose-400">
@@ -99,10 +129,70 @@ export default function EventCard({ event }) {
           )}
         </div>
 
+        {event.offer && (
+          <div className="mt-3 rounded-2xl border border-line bg-white/[0.03] p-4">
+            <p className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-mute">
+              <Building2 className="h-3.5 w-3.5 text-gold-400" />
+              Offer{event.offer.company ? ` from ${event.offer.company}` : ""}
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-mute">Advance</p>
+                <p className="mt-1 font-display text-xl text-aqua-400">
+                  {formatMoney(event.offer.advance)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-mute">Total fee</p>
+                <p className="mt-1 font-display text-xl text-gold-300">
+                  {formatMoney(event.offer.total)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {event.response === "pending" && (
+          <div className="mt-4">
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                disabled={busy !== ""}
+                onClick={() => answer("accept")}
+                className="gold-btn inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-60"
+              >
+                <Check className="h-4 w-4" />
+                Accept
+              </button>
+              <button
+                type="button"
+                disabled={busy !== ""}
+                onClick={() => answer("decline")}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/40 px-4 py-2.5 text-sm font-semibold text-rose-300 transition duration-200 hover:bg-rose-500/10 disabled:opacity-60"
+              >
+                <X className="h-4 w-4" />
+                Decline
+              </button>
+            </div>
+            {event.offer?.total > 0 && (
+              <p className="mt-2 text-center text-xs text-mute">
+                Accepting adds this to your projects.
+              </p>
+            )}
+          </div>
+        )}
+
+        {event.response === "accepted" && event.offer?.total > 0 && (
+          <p className="mt-4 flex items-start gap-2 rounded-xl border border-aqua-400/30 bg-aqua-400/10 px-3 py-2 text-xs text-aqua-400">
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            Accepted. This is in your projects.
+          </p>
+        )}
+
         <div className="mt-2 divide-y divide-line/70">
           <Row
             icon={MapPin}
-            label="Where"
+            label={event.offer ? "Shooting location" : "Where"}
             action={
               !event.online && (
                 <ActionLink href={mapsUrl} icon={Navigation} external>

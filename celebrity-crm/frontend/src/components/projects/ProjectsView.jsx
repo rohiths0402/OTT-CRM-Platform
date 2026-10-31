@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Clapperboard } from "lucide-react";
 import ProjectCard from "./ProjectCard";
 import ProjectDrawer from "./ProjectDrawer";
-import { projects } from "../../data/projects";
+import { getProjects } from "../../api/projectApi";
 
 const tabs = [
   { id: "active", label: "Active" },
@@ -12,8 +12,18 @@ const tabs = [
 ];
 
 export default function ProjectsView({ onNavigate }) {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [tab, setTab] = useState("active");
   const [openProject, setOpenProject] = useState(null);
+
+  useEffect(() => {
+    getProjects()
+      .then(setProjects)
+      .catch(() => setError("Could not load your projects."))
+      .finally(() => setLoading(false));
+  }, []);
 
   const counts = useMemo(
     () =>
@@ -23,7 +33,7 @@ export default function ProjectsView({ onNavigate }) {
           projects.filter((project) => project.status === id).length,
         ]),
       ),
-    [],
+    [projects],
   );
   const visible = projects.filter((project) => project.status === tab);
 
@@ -69,7 +79,11 @@ export default function ProjectsView({ onNavigate }) {
       </div>
 
       <div className="mt-6">
-        {visible.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-mute">Loading your projects...</p>
+        ) : error ? (
+          <p className="text-sm text-rose-400">{error}</p>
+        ) : visible.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-line bg-ink-900/60 p-12 text-center">
             <Clapperboard className="mx-auto h-8 w-8 text-gold-400" />
             <p className="mt-4 font-display text-xl text-ivory">

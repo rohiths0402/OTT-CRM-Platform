@@ -3,7 +3,14 @@ import { CalendarCheck } from "lucide-react";
 import EventCard from "./EventCard";
 import { dayLabel, formatDay } from "../../utils/dates";
 
-export default function DayDetails({ date, today, events, nextEvent, onJump }) {
+export default function DayDetails({
+  date,
+  today,
+  events,
+  nextEvent,
+  onJump,
+  onRespond,
+}) {
   return (
     <aside className="lg:sticky lg:top-28">
       <div className="flex items-end justify-between gap-4">
@@ -30,7 +37,9 @@ export default function DayDetails({ date, today, events, nextEvent, onJump }) {
           className="mt-4 space-y-4"
         >
           {events.length > 0 ? (
-            events.map((event) => <EventCard key={event.id} event={event} />)
+            events.map((event) => (
+              <EventCard key={event.id} event={event} onRespond={onRespond} />
+            ))
           ) : (
             <div className="rounded-3xl border border-dashed border-line bg-ink-900/60 p-8 text-center">
               <CalendarCheck className="mx-auto h-8 w-8 text-gold-400" />

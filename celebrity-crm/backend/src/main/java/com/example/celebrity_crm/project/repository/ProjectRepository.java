@@ -8,4 +8,8 @@ import java.util.List;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findByUserIdOrderByIdDesc(Long userId);
+
+    List<Project> findByUserIdOrderByIdAsc(Long userId);
+
+    boolean existsByUserIdAndTitleIgnoreCase(Long userId, String title);
 }
