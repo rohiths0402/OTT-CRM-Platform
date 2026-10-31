@@ -72,6 +72,8 @@ export const attention = [
   },
 ];
 
+const currentMonthDate = new Date();
+
 export const upcoming = [
   {
     id: 1,
@@ -80,6 +82,7 @@ export const upcoming = [
     title: "Night shoot continues",
     place: "Film City, Set 14",
     time: "6:30 PM",
+    date: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 31),
   },
   {
     id: 2,
@@ -88,6 +91,7 @@ export const upcoming = [
     title: "Script narration meeting",
     place: "Chennai office",
     time: "4:00 PM",
+    date: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 2),
   },
   {
     id: 3,
@@ -96,6 +100,7 @@ export const upcoming = [
     title: "Brand photoshoot",
     place: "Studio 4",
     time: "10:30 AM",
+    date: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 4),
   },
 ];
 
@@ -138,6 +143,60 @@ export const notifications = [
     read: false,
   },
 ];
+export const recentPayments = [
+  {
+    id: 1,
+    title: "Aster Watches",
+    event: "Festival campaign shoot",
+    date: "18 Oct 2026",
+    amount: 200000,
+    status: "Cleared",
+  },
+  {
+    id: 2,
+    title: "Northlight Productions",
+    event: "The Blood Oath",
+    date: "12 Oct 2026",
+    amount: 175000,
+    status: "Cleared",
+  },
+  {
+    id: 3,
+    title: "Studio Lotus",
+    event: "Commercial shoot",
+    date: "08 Oct 2026",
+    amount: 98000,
+    status: "Cleared",
+  },
+];
+
+export const pendingPayments = [
+  {
+    id: 1,
+    title: "Aster Watches",
+    event: "Brand photoshoot",
+    dueDate: "05 Nov 2026",
+    amount: 120000,
+    status: "Pending",
+  },
+  {
+    id: 2,
+    title: "Horizon Films",
+    event: "Trailer promotion",
+    dueDate: "12 Nov 2026",
+    amount: 95000,
+    status: "Pending",
+  },
+  {
+    id: 3,
+    title: "Chola Studios",
+    event: "Script narration",
+    dueDate: "18 Nov 2026",
+    amount: 68000,
+    status: "Pending",
+  },
+];
+
 export const coverPhotos = [
   { id: 1, image: "/celebrities/celebrity-1.jpg" },
   { id: 2, image: "/celebrities/celebrity-2.jpg" },

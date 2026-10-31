@@ -21,13 +21,14 @@ const filters = [
   })),
 ];
 
-export default function ScheduleView() {
+export default function ScheduleView({ initialSelectedDate }) {
   const today = useMemo(() => startOfDay(new Date()), []);
+  const safeInitial = initialSelectedDate ? startOfDay(new Date(initialSelectedDate)) : today;
   const [view, setView] = useState("month");
   const [filter, setFilter] = useState("all");
-  const [selected, setSelected] = useState(today);
+  const [selected, setSelected] = useState(safeInitial);
   const [monthStart, setMonthStart] = useState(
-    () => new Date(today.getFullYear(), today.getMonth(), 1),
+    () => new Date(safeInitial.getFullYear(), safeInitial.getMonth(), 1),
   );
 
   const filtered = useMemo(

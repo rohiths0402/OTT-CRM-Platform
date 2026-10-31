@@ -6,6 +6,7 @@ import Topbar from "../components/Topbar";
 import DashboardHome from "../components/DashboardHome";
 import ScheduleView from "../components/schedule/ScheduleView";
 import ProjectsView from "../components/projects/ProjectsView";
+import PaymentsView from "../components/PaymentsView";
 import ChangePasswordForm from "../components/ChangePasswordForm";
 import { useAuth } from "../context/AuthContext";
 import { navItems } from "../data/navigation";
@@ -29,14 +30,16 @@ export default function Dashboard() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("home");
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [menuOpen, setMenuOpen] = useState(false);
 
   const name = user?.name || "Guest";
   const current =
     navItems.find((entry) => entry.id === activeTab) || navItems[0];
 
-  const select = (id) => {
+  const select = (id, date) => {
     setActiveTab(id);
+    if (date) setSelectedDate(date);
     setMenuOpen(false);
   };
 
@@ -48,8 +51,10 @@ export default function Dashboard() {
   const renderContent = () => {
     if (activeTab === "home")
       return <DashboardHome name={name} onNavigate={select} />;
-    if (activeTab === "schedule") return <ScheduleView />;
+    if (activeTab === "schedule")
+      return <ScheduleView initialSelectedDate={selectedDate} />;
     if (activeTab === "projects") return <ProjectsView onNavigate={select} />;
+    if (activeTab === "payments") return <PaymentsView />;
     if (activeTab === "security") {
       return (
         <div>
