@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Lock, LogOut, X } from "lucide-react";
-import Logo from "./Logo";
 import { navItems } from "../data/navigation";
 
 export default function Sidebar({
+  name,
   activeTab,
   onSelect,
   open,
@@ -27,13 +27,20 @@ export default function Sidebar({
       </AnimatePresence>
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between border-r border-line bg-ink-900 px-5 py-6 transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between border-r border-line bg-gradient-to-b from-ink-900 via-ink-900 to-ink-950 px-5 py-6 transition-transform duration-300 ease-out lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div>
-          <div className="flex items-center justify-between px-2">
-            <Logo />
+          <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-2 pb-5">
+            <div className="min-w-0">
+              {/* <span className="block text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">
+                Talent Workspace
+              </span> */}
+              <h2 className="mt-1 truncate font-display text-2xl font-light tracking-wider bg-gradient-to-r from-ivory via-gold-200 to-gold-400 bg-clip-text text-transparent">
+                {name}
+              </h2>
+            </div>
             <button
               type="button"
               aria-label="Close menu"
@@ -44,7 +51,10 @@ export default function Sidebar({
             </button>
           </div>
 
-          <nav aria-label="Main" className="mt-10 space-y-1">
+          <nav aria-label="Main" className="mt-6 space-y-1">
+            <p className="mb-3 px-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-mute/70">
+              Studio menu
+            </p>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;

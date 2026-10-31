@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { getPhotos, photoUrl } from "../api/photoApi";
 
-export default function Avatar({ name, className = "h-10 w-10" }) {
+export default function Avatar({
+  name,
+  photo,
+  className = "h-10 w-10",
+}) {
   const [photoId, setPhotoId] = useState(null);
 
   useEffect(() => {
@@ -19,8 +23,12 @@ export default function Avatar({ name, className = "h-10 w-10" }) {
     <span
       className={`grid shrink-0 place-items-center overflow-hidden rounded-full border border-gold-400/40 bg-ink-800 text-sm font-semibold text-gold-300 ${className}`}
     >
-      {photoId ? (
-        <img src={photoUrl(photoId)} alt={name} className="h-full w-full object-cover" />
+      {photo || photoId ? (
+        <img
+          src={photo || photoUrl(photoId)}
+          alt={name}
+          className="h-full w-full object-cover"
+        />
       ) : (
         name.charAt(0).toUpperCase()
       )}

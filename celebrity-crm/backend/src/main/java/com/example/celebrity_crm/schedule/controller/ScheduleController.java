@@ -2,7 +2,7 @@ package com.example.celebrity_crm.schedule.controller;
 
 import com.example.celebrity_crm.config.CurrentUser;
 import com.example.celebrity_crm.schedule.dto.ScheduleRequest;
-import com.example.celebrity_crm.schedule.model.ScheduleEvent;
+import com.example.celebrity_crm.schedule.dto.ScheduleResponse;
 import com.example.celebrity_crm.schedule.service.ScheduleService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,19 +24,29 @@ public class ScheduleController {
     }
 
     @GetMapping
-    public List<ScheduleEvent> list(Authentication authentication) {
+    public List<ScheduleResponse> list(Authentication authentication) {
         return service.list(currentUser.id(authentication));
     }
 
     @PostMapping
-    public ScheduleEvent add(Authentication authentication, @Valid @RequestBody ScheduleRequest request) {
+    public ScheduleResponse add(Authentication authentication, @Valid @RequestBody ScheduleRequest request) {
         return service.add(currentUser.id(authentication), request);
     }
 
     @PutMapping("/{id}")
-    public ScheduleEvent update(Authentication authentication, @PathVariable Long id,
-                                @Valid @RequestBody ScheduleRequest request) {
+    public ScheduleResponse update(Authentication authentication, @PathVariable Long id,
+                                   @Valid @RequestBody ScheduleRequest request) {
         return service.update(currentUser.id(authentication), id, request);
+    }
+
+    @PutMapping("/{id}/accept")
+    public ScheduleResponse accept(Authentication authentication, @PathVariable Long id) {
+        return service.accept(currentUser.id(authentication), id);
+    }
+
+    @PutMapping("/{id}/decline")
+    public ScheduleResponse decline(Authentication authentication, @PathVariable Long id) {
+        return service.decline(currentUser.id(authentication), id);
     }
 
     @DeleteMapping("/{id}")

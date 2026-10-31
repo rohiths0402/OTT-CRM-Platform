@@ -13,6 +13,15 @@ const api = axios.create({
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const mockUser = { id: 1, name: "Celebrity Demo", role: "CELEBRITY" };
+const mockUserForEmail = (email) => {
+  const username = email.split("@", 1)[0].split("+", 1)[0];
+  const name = username
+    .replace(/[._-]+/g, " ")
+    .trim()
+    .toLowerCase()
+    .replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
+  return { ...mockUser, name: name || mockUser.name, email };
+};
 
 const rejectWith = (message) => {
   const error = new Error(message);
@@ -69,7 +78,7 @@ export const passwordLogin = (email, password, rememberMe = false) =>
     ? wait(700).then(() => {
         if (password !== mockPassword)
           throw rejectWith("Email or password is incorrect.");
-        return { data: { user: { ...mockUser, email } } };
+        return { data: { user: mockUserForEmail(email) } };
       })
     : api.post("/auth/login", { email, password, rememberMe });
 

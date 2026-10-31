@@ -77,9 +77,11 @@ public class DashboardService {
     }
 
     private DashboardResponse.TodayShoot todayShoot(Long userId, LocalDate today) {
-        return schedule.findFirstByUserIdAndTypeAndEventDateOrderByEventTime(userId, "SHOOT", today)
-                .map(e -> new DashboardResponse.TodayShoot(e.getTitle(), e.getScene(), e.getShift(),
-                        time(e.getEventTime()), e.getLocation(), e.getVanity(), e.getCostume()))
+        return schedule.findFirstByUserIdAndTypeAndEventDateOrderByCallTime(userId, "shoot", today)
+                .map(e -> new DashboardResponse.TodayShoot(
+                        e.getProjectName() != null ? e.getProjectName() : e.getTitle(),
+                        e.getTitle(), shift(e.getCallTime()), time(e.getCallTime()),
+                        e.getLocation(), e.getVanity(), e.getWardrobe()))
                 .orElse(null);
     }
 
@@ -112,11 +114,11 @@ public class DashboardService {
     }
 
     private List<DashboardResponse.Upcoming> upcoming(Long userId, LocalDate today) {
-        return schedule.findTop3ByUserIdAndEventDateAfterOrderByEventDateAscEventTimeAsc(userId, today)
+        return schedule.findTop3ByUserIdAndEventDateAfterOrderByEventDateAscCallTimeAsc(userId, today)
                 .stream()
                 .map(e -> new DashboardResponse.Upcoming(e.getId(),
                         e.getEventDate().format(DAY), e.getEventDate().format(MONTH),
-                        e.getTitle(), e.getLocation(), time(e.getEventTime())))
+                        e.getTitle(), e.getLocation(), time(e.getCallTime())))
                 .toList();
     }
 
@@ -156,6 +158,16 @@ public class DashboardService {
                     ago(n.getCreatedAt(), now), n.isSeen()));
         }
         return list;
+    }
+
+    private String shift(LocalTime time) {
+        if (time == null) {
+            return "Shoot";
+        }
+        if (time.getHour() < 12) {
+            return "Morning shoot";
+        }
+        return time.getHour() < 17 ? "Afternoon shoot" : "Night shoot";
     }
 
     private String time(LocalTime time) {

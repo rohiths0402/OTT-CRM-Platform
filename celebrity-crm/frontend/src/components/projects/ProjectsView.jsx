@@ -11,9 +11,11 @@ const tabs = [
   { id: "completed", label: "Completed" },
 ];
 
-export default function ProjectsView({ onNavigate }) {
-  const [tab, setTab] = useState("active");
-  const [openProject, setOpenProject] = useState(null);
+export default function ProjectsView({ onNavigate, initialProjectId }) {
+  const initial =
+    projects.find((project) => project.id === initialProjectId) || null;
+  const [tab, setTab] = useState(initial ? initial.status : "active");
+  const [openProject, setOpenProject] = useState(initial);
 
   const counts = useMemo(
     () =>

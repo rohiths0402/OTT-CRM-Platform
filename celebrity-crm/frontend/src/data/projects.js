@@ -34,7 +34,11 @@ export const projects = [
     release: "Dec 2026",
     nextCall: "Wed, 10:00 AM",
     tint: "from-[#17314a] via-[#14202e] to-[#13101a]",
-    money: { total: 7500000, received: 7500000, next: null },
+    money: {
+      total: 7500000,
+      received: 5000000,
+      next: "Overdue, your manager is following up",
+    },
     contract: "signed",
     team: [{ name: "Suresh Pillai", role: "Director", phone: "919800000030" }],
   },

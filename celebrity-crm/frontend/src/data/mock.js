@@ -37,12 +37,6 @@ export const celebrities = [
   },
 ];
 
-export const manager = {
-  name: "Priya Menon",
-  phone: "919876543210",
-  display: "+91 98765 43210",
-};
-
 export const todayShoot = {
   title: "The Blood Oath",
   scene: "Climax sequence",
@@ -82,7 +76,11 @@ export const upcoming = [
     title: "Night shoot continues",
     place: "Film City, Set 14",
     time: "6:30 PM",
-    date: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), 31),
+    date: new Date(
+      currentMonthDate.getFullYear(),
+      currentMonthDate.getMonth(),
+      31,
+    ),
   },
   {
     id: 2,
@@ -91,7 +89,11 @@ export const upcoming = [
     title: "Script narration meeting",
     place: "Chennai office",
     time: "4:00 PM",
-    date: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 2),
+    date: new Date(
+      currentMonthDate.getFullYear(),
+      currentMonthDate.getMonth() + 1,
+      2,
+    ),
   },
   {
     id: 3,
@@ -100,7 +102,11 @@ export const upcoming = [
     title: "Brand photoshoot",
     place: "Studio 4",
     time: "10:30 AM",
-    date: new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 4),
+    date: new Date(
+      currentMonthDate.getFullYear(),
+      currentMonthDate.getMonth() + 1,
+      4,
+    ),
   },
 ];
 
@@ -127,22 +133,6 @@ export const projects = [
   },
 ];
 
-export const notifications = [
-  {
-    id: 1,
-    title: "Call time updated",
-    desc: "Tonight's shoot now starts at 6:30 PM.",
-    time: "25m ago",
-    read: false,
-  },
-  {
-    id: 2,
-    title: "Payment received",
-    desc: "₹ 2,00,000 from Aster Watches.",
-    time: "2h ago",
-    read: false,
-  },
-];
 export const recentPayments = [
   {
     id: 1,
@@ -197,20 +187,6 @@ export const pendingPayments = [
   },
 ];
 
-export const coverPhotos = [
-  { id: 1, image: "/celebrities/celebrity-1.jpg" },
-  { id: 2, image: "/celebrities/celebrity-2.jpg" },
-  { id: 3, image: "/celebrities/celebrity-3.jpg" },
-  { id: 4, image: "/celebrities/celebrity-4.jpg" },
-  { id: 5, image: "/celebrities/celebrity-5.jpg" },
-  { id: 6, image: "/celebrities/celebrity-6.jpg" },
-];
-
-// export const manager = {
-//   name: "Priya Menon",
-//   phone: "919876543210",
-//   display: "+91 98765 43210",
-// };
 
 // export const notifications = [
 //   {
@@ -228,3 +204,52 @@ export const coverPhotos = [
 //     read: false,
 //   },
 // ];
+export const coverPhotos = [
+  { id: 1, image: "/celebrities/celebrity-1.jpg" },
+  { id: 2, image: "/celebrities/celebrity-2.jpg" },
+  { id: 3, image: "/celebrities/celebrity-3.jpg" },
+  { id: 4, image: "/celebrities/celebrity-4.jpg" },
+  { id: 5, image: "/celebrities/celebrity-5.jpg" },
+  { id: 6, image: "/celebrities/celebrity-6.jpg" },
+];
+
+export const manager = {
+  name: "Priya Menon",
+  phone: "919876543210",
+  display: "+91 98765 43210",
+};
+
+export const notifications = [
+  {
+    id: 1,
+    title: "Call time updated",
+    desc: "Tonight's shoot now starts at 6:30 PM.",
+    time: "25m ago",
+    read: false,
+    target: "schedule",
+  },
+  {
+    id: 2,
+    title: "Payment received",
+    desc: "₹ 30 L advance from Lumen Studios.",
+    time: "2d ago",
+    read: false,
+    target: "payments",
+  },
+  {
+    id: 3,
+    title: "Contract needs your signature",
+    desc: "Festival Watch Campaign · Aster Watches",
+    time: "1h ago",
+    read: false,
+    target: "contracts",
+  },
+  {
+    id: 4,
+    title: "Campaign cut is ready",
+    desc: "Review the latest Aster Watches deliverable.",
+    time: "3h ago",
+    read: true,
+    target: "deals",
+  },
+];

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { CalendarCheck, ChevronRight } from "lucide-react";
-import { eventTypes, statusStyles } from "../../data/schedule";
+import { eventTypes } from "../../data/schedule";
+import { dotFor, statusFor } from "../../utils/offer";
 import { dayLabel, formatDay } from "../../utils/dates";
 
 function groupByDay(events) {
@@ -41,7 +42,7 @@ export default function AgendaList({ events, today, onPick }) {
           <ul className="mt-3 space-y-3">
             {group.items.map((event, index) => {
               const type = eventTypes[event.type];
-              const status = statusStyles[event.status];
+              const status = statusFor(event);
               return (
                 <motion.li
                   key={event.id}
@@ -58,7 +59,7 @@ export default function AgendaList({ events, today, onPick }) {
                     className="group flex w-full items-center gap-4 rounded-2xl border border-line bg-ink-900 p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-gold-400/40"
                   >
                     <span
-                      className={`h-12 w-1 shrink-0 rounded-full ${type.dot}`}
+                      className={`h-12 w-1 shrink-0 rounded-full ${dotFor(event)}`}
                     />
                     <span className="w-20 shrink-0">
                       <span className="block font-display text-xl leading-tight text-gold-300">

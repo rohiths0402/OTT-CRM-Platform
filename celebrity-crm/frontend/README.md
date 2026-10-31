@@ -2,17 +2,17 @@
 
 React + Vite + Tailwind CSS v4.
 
-## Setup
+## Run on Windows
 
-```
+From the repository root in PowerShell:
+
+```powershell
+Set-Location .\celebrity-crm\frontend
 npm install
-npm install react-router-dom lucide-react react-icons axios @react-oauth/google firebase
-npm install tailwindcss @tailwindcss/vite
-cp .env.example .env
 npm run dev
 ```
 
-Open http://localhost:5173
+Open http://localhost:5173. Use Node.js 20.19+ or 22.12+.
 
 ## Mock mode
 
@@ -20,6 +20,13 @@ Open http://localhost:5173
 
 - Email login: any valid email with password `Celeb@123`
 - Mobile OTP and forgot password OTP: any valid number or email, code `123456`
+
+Brand deals, contracts, incoming settlements and payment history use sample
+data and reset when the dashboard is refreshed. Profile details are saved in
+the browser's signed-in account. "Make a payment" opens a UPI app link; the
+transfer itself is authorized in that app, and a UTR is needed to add it to the
+session's Sent history. The signature pad is a visual demo, not a legally
+binding e-signature service.
 
 Set `VITE_USE_MOCK=false` and fill the Firebase and Google values to use the real backend.
 
