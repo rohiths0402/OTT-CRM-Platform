@@ -22,7 +22,10 @@ export default function PhotoCard({ name }) {
   useEffect(() => {
     getPhotos()
       .then((res) => {
-        setPhotos(res.data);
+        const data = Array.isArray(res.data)
+          ? res.data
+          : res.data?.photos || res.data?.content || [];
+        setPhotos(data);
         setActive(0);
       })
       .catch(() => setError("Could not load photos."));
@@ -45,14 +48,18 @@ export default function PhotoCard({ name }) {
       await uploadPhoto(small);
       changed();
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Could not upload the photo.");
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Could not upload the photo.",
+      );
     } finally {
       setBusy(false);
     }
   };
 
   const onDelete = async () => {
-    const photo = photos[active];
+    const photo = Array.isArray(photos) ? photos[active] : null;
     if (!photo) return;
 
     setBusy(true);
@@ -67,9 +74,11 @@ export default function PhotoCard({ name }) {
     }
   };
 
+  const hasPhotos = Array.isArray(photos) && photos.length > 0;
+
   return (
     <div className="absolute inset-0">
-      {photos.length > 0 ? (
+      {hasPhotos ? (
         <Swiper
           key={photos.map((p) => p.id).join("-")}
           modules={[Autoplay, EffectFade, Pagination]}
@@ -99,7 +108,9 @@ export default function PhotoCard({ name }) {
         <div className="grid h-full w-full place-items-center text-center">
           <div>
             <UserRound className="mx-auto h-14 w-14 text-gold-400/70" />
-            <p className="mt-3 text-xs text-mute">Add your photo with the camera button</p>
+            <p className="mt-3 text-xs text-mute">
+              Add your photo with the camera button
+            </p>
           </div>
         </div>
       )}
@@ -112,9 +123,13 @@ export default function PhotoCard({ name }) {
           aria-label="Upload a photo"
           className={iconButton}
         >
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+          {busy ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Camera className="h-4 w-4" />
+          )}
         </button>
-        {photos.length > 0 && (
+        {hasPhotos && (
           <button
             type="button"
             disabled={busy}
@@ -133,7 +148,13 @@ export default function PhotoCard({ name }) {
         </p>
       )}
 
-      <input ref={fileInput} type="file" accept="image/*" hidden onChange={onPick} />
+      <input
+        ref={fileInput}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={onPick}
+      />
     </div>
   );
 }

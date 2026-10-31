@@ -1,0 +1,162 @@
+import {
+  Car,
+  Info,
+  MapPin,
+  Navigation,
+  Phone,
+  Shirt,
+  StickyNote,
+} from "lucide-react";
+import { eventTypes, statusStyles } from "../../data/schedule";
+
+const timeLabels = { shoot: "Call time", travel: "Departs" };
+const endLabels = { shoot: "Pack up", travel: "Arrives" };
+
+function Row({ icon: Icon, label, action, children }) {
+  return (
+    <div className="flex items-start gap-3 py-3">
+      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/[0.04] text-gold-400">
+        <Icon className="h-4 w-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] uppercase tracking-wider text-mute">
+          {label}
+        </p>
+        <div className="mt-0.5 text-sm text-ivory">{children}</div>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function ActionLink({ href, icon: Icon, external = false, children }) {
+  return (
+    <a
+      href={href}
+      target={external ? "_blank" : undefined}
+      rel="noreferrer"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-ivory transition duration-200 hover:border-gold-400/60 hover:bg-gold-400/10 hover:text-gold-300"
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {children}
+    </a>
+  );
+}
+
+export default function EventCard({ event }) {
+  const type = eventTypes[event.type];
+  const status = statusStyles[event.status];
+  const TypeIcon = type.icon;
+  const place = [event.location, event.city].filter(Boolean).join(", ");
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
+
+  return (
+    <article className="overflow-hidden rounded-3xl border border-line bg-ink-900 transition duration-200 hover:border-gold-400/30">
+      <div className={`h-1 ${type.dot}`} />
+      <div className="p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${type.chip}`}
+          >
+            <TypeIcon className="h-3.5 w-3.5" />
+            {type.label}
+          </span>
+          <span
+            className={`rounded-full border px-3 py-1 text-xs font-medium ${status.className}`}
+          >
+            {status.label}
+          </span>
+        </div>
+
+        <h4 className="mt-4 font-display text-2xl leading-tight text-ivory">
+          {event.title}
+        </h4>
+        <p className="mt-1 text-sm text-mute">{event.project}</p>
+
+        {event.statusNote && (
+          <p className="mt-4 flex items-start gap-2 rounded-xl border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-xs text-rose-400">
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            {event.statusNote}
+          </p>
+        )}
+
+        <div className="mt-5 flex items-end justify-between gap-4 rounded-2xl bg-ink-800/70 px-4 py-3">
+          <div>
+            <p className="text-[11px] uppercase tracking-wider text-mute">
+              {timeLabels[event.type] || "Starts"}
+            </p>
+            <p className="gold-text font-display text-3xl leading-tight">
+              {event.callTime}
+            </p>
+          </div>
+          {event.wrapTime && (
+            <div className="text-right">
+              <p className="text-[11px] uppercase tracking-wider text-mute">
+                {endLabels[event.type] || "Ends"}
+              </p>
+              <p className="text-sm font-medium text-ivory">{event.wrapTime}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-2 divide-y divide-line/70">
+          <Row
+            icon={MapPin}
+            label="Where"
+            action={
+              !event.online && (
+                <ActionLink href={mapsUrl} icon={Navigation} external>
+                  Directions
+                </ActionLink>
+              )
+            }
+          >
+            {place}
+          </Row>
+
+          {event.contact && (
+            <Row
+              icon={Phone}
+              label="Contact"
+              action={
+                <ActionLink href={`tel:+${event.contact.phone}`} icon={Phone}>
+                  Call
+                </ActionLink>
+              }
+            >
+              {event.contact.name}
+              <span className="text-mute">, {event.contact.role}</span>
+            </Row>
+          )}
+
+          {event.pickup && (
+            <Row icon={Car} label="Pickup">
+              {event.pickup.time}, {event.pickup.driver}
+              <span className="block text-xs text-mute">
+                {event.pickup.vehicle}
+              </span>
+            </Row>
+          )}
+
+          {event.look && (
+            <Row icon={Shirt} label="Look">
+              {event.look.wardrobe}
+              <span className="block text-xs text-mute">
+                {[event.look.vanity, event.look.makeup]
+                  .filter(Boolean)
+                  .join(". ")}
+              </span>
+            </Row>
+          )}
+        </div>
+
+        {event.notes && (
+          <p className="mt-3 flex gap-2 rounded-xl bg-white/[0.03] px-3 py-2.5 text-xs leading-relaxed text-mute">
+            <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-400" />
+            {event.notes}
+          </p>
+        )}
+      </div>
+    </article>
+  );
+}

@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
-import Topbar from "../components/TopBar";
+import Topbar from "../components/Topbar";
 import DashboardHome from "../components/DashboardHome";
+import ScheduleView from "../components/schedule/ScheduleView";
+import ProjectsView from "../components/projects/ProjectsView";
 import ChangePasswordForm from "../components/ChangePasswordForm";
 import { useAuth } from "../context/AuthContext";
 import { navItems } from "../data/navigation";
@@ -46,6 +48,8 @@ export default function Dashboard() {
   const renderContent = () => {
     if (activeTab === "home")
       return <DashboardHome name={name} onNavigate={select} />;
+    if (activeTab === "schedule") return <ScheduleView />;
+    if (activeTab === "projects") return <ProjectsView onNavigate={select} />;
     if (activeTab === "security") {
       return (
         <div>
@@ -68,6 +72,7 @@ export default function Dashboard() {
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen bg-ink-950">
         <Sidebar
+          name={name}
           activeTab={activeTab}
           onSelect={select}
           open={menuOpen}
@@ -81,7 +86,7 @@ export default function Dashboard() {
             name={name}
             onOpenMenu={() => setMenuOpen(true)}
           />
-          <main className="mx-auto max-w-5xl px-5 pb-16 pt-8 sm:px-8">
+          <main className="mx-auto max-w-6xl px-5 pb-16 pt-8 sm:px-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}

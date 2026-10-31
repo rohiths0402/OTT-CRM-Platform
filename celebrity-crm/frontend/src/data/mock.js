@@ -138,3 +138,34 @@ export const notifications = [
     read: false,
   },
 ];
+export const coverPhotos = [
+  { id: 1, image: "/celebrities/celebrity-1.jpg" },
+  { id: 2, image: "/celebrities/celebrity-2.jpg" },
+  { id: 3, image: "/celebrities/celebrity-3.jpg" },
+  { id: 4, image: "/celebrities/celebrity-4.jpg" },
+  { id: 5, image: "/celebrities/celebrity-5.jpg" },
+  { id: 6, image: "/celebrities/celebrity-6.jpg" },
+];
+
+// export const manager = {
+//   name: "Priya Menon",
+//   phone: "919876543210",
+//   display: "+91 98765 43210",
+// };
+
+// export const notifications = [
+//   {
+//     id: 1,
+//     title: "Call time updated",
+//     desc: "Tonight's shoot now starts at 6:30 PM.",
+//     time: "25m ago",
+//     read: false,
+//   },
+//   {
+//     id: 2,
+//     title: "Payment received",
+//     desc: "₹ 30 L advance from Lumen Studios.",
+//     time: "2d ago",
+//     read: false,
+//   },
+// ];

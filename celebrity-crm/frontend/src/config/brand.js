@@ -1,4 +1,4 @@
 export const brand = {
-  name: "Rajini ",
+  name: "Celebrity CRM",
   product: "Celebrity Suite",
 };
