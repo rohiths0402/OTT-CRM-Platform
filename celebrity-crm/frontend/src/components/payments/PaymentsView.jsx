@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowDownLeft,
@@ -17,12 +17,19 @@ import {
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import AnimatedMoney from "../AnimatedMoney";
-import { manager } from "../../data/mock";
 import {
   paymentStatus,
   paymentWhen,
   sumAmount,
 } from "../../data/payments";
+import {
+  createSentPayment,
+  getPayments,
+  getSentPayments,
+  settlePayment,
+} from "../../api/paymentApi";
+import { getDashboard } from "../../api/dashboardApi";
+import { payOutWithRazorpay, payWithRazorpay } from "../../utils/razorpay";
 import { formatMoney } from "../../utils/format";
 
 const tabs = [
@@ -40,7 +47,7 @@ const sortPayments = (items) =>
     return a.status === "received" ? b.date - a.date : a.date - b.date;
   });
 
-function MakePaymentForm({ onClose, onRecord }) {
+function MakePaymentForm({ onClose, onRecord, onPaid }) {
   const [recipient, setRecipient] = useState("");
   const [upiId, setUpiId] = useState("");
   const [amount, setAmount] = useState("");
@@ -48,6 +55,7 @@ function MakePaymentForm({ onClose, onRecord }) {
   const [reference, setReference] = useState("");
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const validUpiId = /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z0-9.-]{2,64}$/;
   const paymentLink = `upi://pay?${new URLSearchParams({
@@ -68,32 +76,53 @@ function MakePaymentForm({ onClose, onRecord }) {
       setError("Enter a valid UPI ID, for example name@bank.");
       return;
     }
-    if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
-      setError("Enter a payment amount greater than zero.");
+    if (!Number.isInteger(Number(amount)) || Number(amount) <= 0) {
+      setError("Enter a payment amount in whole rupees, greater than zero.");
       return;
     }
     setError("");
     setReady(true);
   };
 
-  const recordPayment = (event) => {
+  const recordPayment = async (event) => {
     event.preventDefault();
     if (!reference.trim()) {
       setError("Add the UPI transaction reference after you complete payment.");
       return;
     }
-    onRecord({
-      id: `sent-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      direction: "sent",
-      recipient: recipient.trim(),
-      upiId: upiId.trim(),
-      amount: Number(amount),
-      note: note.trim() || "Personal payment",
-      reference: reference.trim(),
-      method: "UPI",
-      status: "sent",
-      date: new Date(),
-    });
+    setSaving(true);
+    try {
+      await onRecord({
+        recipient: recipient.trim(),
+        upiId: upiId.trim(),
+        amount: Number(amount),
+        note: note.trim(),
+        reference: reference.trim(),
+      });
+    } catch {
+      setError("Could not save this payment. Try again.");
+      setSaving(false);
+    }
+  };
+
+  const payTest = async () => {
+    setError("");
+    setSaving(true);
+    try {
+      const saved = await payOutWithRazorpay({
+        recipient: recipient.trim(),
+        upiId: upiId.trim(),
+        amount: Number(amount),
+        note: note.trim(),
+      });
+      if (saved) onPaid(saved);
+      else setSaving(false);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Razorpay payment failed. Try again.",
+      );
+      setSaving(false);
+    }
   };
 
   return (
@@ -151,7 +180,7 @@ function MakePaymentForm({ onClose, onRecord }) {
               <input
                 type="number"
                 min="1"
-                step="0.01"
+                step="1"
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
                 placeholder="5000"
@@ -186,11 +215,29 @@ function MakePaymentForm({ onClose, onRecord }) {
               </p>
               <p className="mt-1 text-xs text-mute">{note || "Personal payment"}</p>
             </div>
+            <button
+              type="button"
+              onClick={payTest}
+              disabled={saving}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-rose-300 px-4 py-3 text-sm font-semibold text-ink-950 transition hover:brightness-110 disabled:opacity-60"
+            >
+              <CreditCard className="h-4 w-4" />
+              {saving ? "Processing..." : "Pay with Razorpay (test)"}
+            </button>
+            <p className="text-center text-[11px] leading-5 text-mute">
+              Test mode: no real money moves. Use test card 4386 2894 0766 0153
+              or UPI success@razorpay.
+            </p>
+            <div className="flex items-center gap-3 text-[11px] uppercase tracking-wider text-mute">
+              <span className="h-px flex-1 bg-line" />
+              or pay with a UPI app
+              <span className="h-px flex-1 bg-line" />
+            </div>
             <a
               href={paymentLink}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-rose-300 px-4 py-3 text-sm font-semibold text-ink-950 transition hover:brightness-110"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-line px-4 py-3 text-sm font-medium text-ivory transition hover:border-rose-300/50"
             >
               <Send className="h-4 w-4" />
               Open UPI app to pay
@@ -205,8 +252,8 @@ function MakePaymentForm({ onClose, onRecord }) {
               />
             </label>
             <p className="text-[11px] leading-5 text-mute">
-              Only add this to Sent history after your UPI app confirms the
-              transfer. Keep the transaction ID for your records.
+              If you paid in your UPI app, add the transaction ID here and
+              record it. Keep the ID for your records.
             </p>
           </div>
         )}
@@ -231,7 +278,8 @@ function MakePaymentForm({ onClose, onRecord }) {
           </button>
           <button
             type="submit"
-            className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
+            disabled={saving}
+            className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-60"
           >
             {ready ? <Check className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
             {ready ? "Record sent payment" : "Review payment"}
@@ -242,37 +290,66 @@ function MakePaymentForm({ onClose, onRecord }) {
   );
 }
 
-function SettlementForm({ payment, onClose, onSettle }) {
-  const remaining = Math.max(
-    0,
-    payment.amount - (payment.receivedAmount || 0),
-  );
+function SettlementForm({ payment, onClose, onSettle, onPaid }) {
+  const remaining = Math.max(0, payment.amount - payment.receivedAmount);
   const [amount, setAmount] = useState(String(remaining));
   const [method, setMethod] = useState("UPI");
   const [reference, setReference] = useState("");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const submit = (event) => {
-    event.preventDefault();
+  const payOnline = async () => {
     const paidAmount = Number(amount);
     if (
-      !Number.isFinite(paidAmount) ||
+      !Number.isInteger(paidAmount) ||
       paidAmount <= 0 ||
       paidAmount > remaining
     ) {
-      setError("Enter a valid amount up to the remaining balance.");
+      setError("Enter a whole amount up to the remaining balance.");
+      return;
+    }
+    setError("");
+    setSaving(true);
+    try {
+      const updated = await payWithRazorpay(payment, paidAmount);
+      if (updated) onPaid(updated);
+      else setSaving(false);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Razorpay payment failed. Try again.",
+      );
+      setSaving(false);
+    }
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+    const paidAmount = Number(amount);
+    if (
+      !Number.isInteger(paidAmount) ||
+      paidAmount <= 0 ||
+      paidAmount > remaining
+    ) {
+      setError("Enter a whole amount up to the remaining balance.");
       return;
     }
     if (!reference.trim()) {
       setError("Add the bank or transaction reference to record this payment.");
       return;
     }
-    onSettle(payment.id, {
-      amount: paidAmount,
-      method,
-      reference: reference.trim(),
-      date: new Date(),
-    });
+    setSaving(true);
+    try {
+      await onSettle(payment.id, {
+        amount: paidAmount,
+        method,
+        reference: reference.trim(),
+      });
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Could not record this payment. Try again.",
+      );
+      setSaving(false);
+    }
   };
 
   return (
@@ -311,8 +388,8 @@ function SettlementForm({ payment, onClose, onSettle }) {
             </p>
           )}
           <p className="mt-1 text-[11px] leading-5 text-mute">
-            Demo only: this records a payment you have already received. It
-            does not initiate a bank or UPI transfer.
+            This records a payment you have already received. It does not
+            initiate a bank or UPI transfer.
           </p>
         </div>
         <div className="mt-5 space-y-4">
@@ -321,6 +398,7 @@ function SettlementForm({ payment, onClose, onSettle }) {
             <input
               type="number"
               min="1"
+              step="1"
               max={remaining}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
@@ -356,7 +434,7 @@ function SettlementForm({ payment, onClose, onSettle }) {
             {error}
           </p>
         )}
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex flex-wrap justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -365,8 +443,18 @@ function SettlementForm({ payment, onClose, onSettle }) {
             Cancel
           </button>
           <button
+            type="button"
+            onClick={payOnline}
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-xl border border-gold-400/40 bg-gold-400/10 px-4 py-2.5 text-sm font-semibold text-gold-300 transition hover:bg-gold-400/20 disabled:opacity-60"
+          >
+            <CreditCard className="h-4 w-4" />
+            Pay with Razorpay (test)
+          </button>
+          <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-aqua-400 px-5 py-2.5 text-sm font-semibold text-ink-950 transition hover:brightness-110"
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-xl bg-aqua-400 px-5 py-2.5 text-sm font-semibold text-ink-950 transition hover:brightness-110 disabled:opacity-60"
           >
             <Check className="h-4 w-4" />
             Confirm received
@@ -377,10 +465,10 @@ function SettlementForm({ payment, onClose, onSettle }) {
   );
 }
 
-function PaymentDetails({ payment, onClose, onRecordPayment }) {
+function PaymentDetails({ payment, manager, onClose, onRecordPayment }) {
   const status = paymentStatus[payment.status];
   const Icon = status.icon;
-  const managerFirstName = manager.name.split(" ")[0];
+  const managerFirstName = manager ? manager.name.split(" ")[0] : "";
   const message = `Hi ${managerFirstName}, could you check the ${payment.kind.toLowerCase()} of ${formatMoney(payment.amount)} from ${payment.payer} for ${payment.project}?`;
 
   return (
@@ -483,15 +571,17 @@ function PaymentDetails({ payment, onClose, onRecordPayment }) {
                 <CreditCard className="h-4 w-4" />
                 Record payment received
               </button>
-              <a
-                href={`https://wa.me/${manager.phone}?text=${encodeURIComponent(message)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-line px-4 py-3 text-sm font-medium text-ivory transition hover:border-gold-400/50 hover:bg-gold-400/5"
-              >
-                <FaWhatsapp className="h-4 w-4 text-aqua-400" />
-                Ask {managerFirstName} to follow up
-              </a>
+              {manager && (
+                <a
+                  href={`https://wa.me/${manager.phone}?text=${encodeURIComponent(message)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-line px-4 py-3 text-sm font-medium text-ivory transition hover:border-gold-400/50 hover:bg-gold-400/5"
+                >
+                  <FaWhatsapp className="h-4 w-4 text-aqua-400" />
+                  Ask {managerFirstName} to follow up
+                </a>
+              )}
             </div>
           ) : (
             <div className="rounded-2xl border border-aqua-400/20 bg-aqua-400/5 p-4">
@@ -524,29 +614,37 @@ function PaymentDetails({ payment, onClose, onRecordPayment }) {
   );
 }
 
-export default function PaymentsView({
-  initialPaymentId,
-  paymentItems,
-  onSettle,
-  outgoingPayments,
-  onRecordOutgoing,
-}) {
-  const initial =
-    paymentItems.find((payment) => payment.id === initialPaymentId) || null;
-  const [tab, setTab] = useState(
-    initial && initial.status === "received" ? "received" : "pending",
-  );
+export default function PaymentsView({ initialPaymentId }) {
+  const [paymentItems, setPaymentItems] = useState([]);
+  const [outgoingPayments, setOutgoingPayments] = useState([]);
+  const [manager, setManager] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [tab, setTab] = useState("pending");
   const [query, setQuery] = useState("");
-  const [selectedPayment, setSelectedPayment] = useState(initial);
+  const [selectedPayment, setSelectedPayment] = useState(null);
   const [settlingPayment, setSettlingPayment] = useState(null);
   const [makePaymentOpen, setMakePaymentOpen] = useState(false);
   const [notice, setNotice] = useState("");
 
+  useEffect(() => {
+    Promise.all([getPayments(), getSentPayments(), getDashboard()])
+      .then(([incoming, sent, dashboard]) => {
+        setPaymentItems(incoming);
+        setOutgoingPayments(sent);
+        setManager(dashboard.manager);
+        const first = incoming.find((item) => item.id === initialPaymentId);
+        if (first) {
+          setTab(first.status === "received" ? "received" : "pending");
+          setSelectedPayment(first);
+        }
+      })
+      .catch(() => setError("Could not load your payments."))
+      .finally(() => setLoading(false));
+  }, [initialPaymentId]);
+
   const received = paymentItems.reduce(
-    (total, payment) =>
-      total +
-      (payment.receivedAmount ||
-        (payment.status === "received" ? payment.amount : 0)),
+    (total, payment) => total + payment.receivedAmount,
     0,
   );
   const stillToCome = sumAmount(
@@ -554,7 +652,7 @@ export default function PaymentsView({
       .filter((payment) => payment.status !== "received")
       .map((payment) => ({
         ...payment,
-        amount: payment.amount - (payment.receivedAmount || 0),
+        amount: payment.amount - payment.receivedAmount,
       })),
   );
   const sentTotal = sumAmount(outgoingPayments);
@@ -586,29 +684,37 @@ export default function PaymentsView({
     }),
   );
 
-  const settle = (paymentId, settlement) => {
-    const payment = paymentItems.find((item) => item.id === paymentId);
-    const updatedAmount =
-      (payment?.receivedAmount || 0) + settlement.amount;
-    const isComplete = updatedAmount >= (payment?.amount || 0);
-    onSettle(paymentId, { ...settlement, isComplete });
+  const finishSettle = (updated) => {
+    const isComplete = updated.status === "received";
+    setPaymentItems((current) =>
+      current.map((item) => (item.id === updated.id ? updated : item)),
+    );
     setSettlingPayment(null);
     setSelectedPayment(null);
     setTab(isComplete ? "received" : "pending");
     setNotice(
       isComplete
-        ? `${payment?.payer || "Payment"} settlement completed`
-        : `Partial settlement recorded for ${payment?.payer || "payment"}`,
+        ? `${updated.payer} settlement completed`
+        : `Partial settlement recorded for ${updated.payer}`,
     );
   };
 
-  const recordOutgoing = (payment) => {
-    onRecordOutgoing(payment);
-    setMakePaymentOpen(false);
-    setTab("sent");
-    setNotice(`${formatMoney(payment.amount)} sent to ${payment.recipient}`);
+  const settle = async (paymentId, settlement) => {
+    const updated = await settlePayment(paymentId, settlement);
+    finishSettle(updated);
   };
 
+    const finishOutgoing = (saved) => {
+    setOutgoingPayments((current) => [saved, ...current]);
+    setMakePaymentOpen(false);
+    setTab("sent");
+    setNotice(`${formatMoney(saved.amount)} sent to ${saved.recipient}`);
+  };
+
+  const recordOutgoing = async (details) => {
+    const saved = await createSentPayment(details);
+    finishOutgoing(saved);
+  };
   const summary = [
     { label: "Received", value: received, tone: "text-aqua-400", icon: ArrowDownLeft },
     { label: "Sent", value: sentTotal, tone: "text-rose-300", icon: Send },
@@ -620,13 +726,20 @@ export default function PaymentsView({
       value: sumAmount(
         overdueList.map((payment) => ({
           ...payment,
-          amount: payment.amount - (payment.receivedAmount || 0),
+          amount: payment.amount - payment.receivedAmount,
         })),
       ),
       tone: overdueList.length ? "text-rose-400" : "text-mute",
       icon: CalendarClock,
     },
   ];
+
+  if (loading) {
+    return <p className="text-sm text-mute">Loading your payments...</p>;
+  }
+  if (error) {
+    return <p className="text-sm text-rose-400">{error}</p>;
+  }
 
   return (
     <div className="space-y-7">
@@ -648,14 +761,14 @@ export default function PaymentsView({
           </div>
           <div className="flex flex-wrap items-end gap-3">
             <div className="relative min-w-48 rounded-2xl border border-aqua-400/20 bg-ink-950/40 p-4">
-            <p className="text-xs text-mute">Available received total</p>
-            <p className="mt-1 font-display text-3xl text-aqua-400">
-              <AnimatedMoney value={received} />
-            </p>
-            <p className="mt-2 flex items-center gap-1 text-[11px] text-aqua-400">
-              <ArrowDownLeft className="h-3 w-3" />
-              Across {counts.received} settlements
-            </p>
+              <p className="text-xs text-mute">Available received total</p>
+              <p className="mt-1 font-display text-3xl text-aqua-400">
+                <AnimatedMoney value={received} />
+              </p>
+              <p className="mt-2 flex items-center gap-1 text-[11px] text-aqua-400">
+                <ArrowDownLeft className="h-3 w-3" />
+                Across {counts.received} settlements
+              </p>
             </div>
             <button
               type="button"
@@ -723,7 +836,7 @@ export default function PaymentsView({
                   : "text-mute hover:text-ivory"
               }`}
             >
-              {id === "sent" ? "Sent" : label}
+              {label}
               <span className="ml-1.5 text-xs opacity-70">{counts[id]}</span>
             </button>
           ))}
@@ -841,7 +954,7 @@ export default function PaymentsView({
                         {formatMoney(
                           payment.status === "received"
                             ? payment.receivedAmount || payment.amount
-                            : payment.amount - (payment.receivedAmount || 0),
+                            : payment.amount - payment.receivedAmount,
                         )}
                       </span>
                     </span>
@@ -886,6 +999,7 @@ export default function PaymentsView({
             key="make-payment"
             onClose={() => setMakePaymentOpen(false)}
             onRecord={recordOutgoing}
+            onPaid={finishOutgoing}
           />
         )}
         {selectedPayment && (
@@ -895,6 +1009,7 @@ export default function PaymentsView({
               paymentItems.find((item) => item.id === selectedPayment.id) ||
               selectedPayment
             }
+            manager={manager}
             onClose={() => setSelectedPayment(null)}
             onRecordPayment={(payment) => setSettlingPayment(payment)}
           />
@@ -905,6 +1020,7 @@ export default function PaymentsView({
             payment={settlingPayment}
             onClose={() => setSettlingPayment(null)}
             onSettle={settle}
+            onPaid={finishSettle}
           />
         )}
       </AnimatePresence>

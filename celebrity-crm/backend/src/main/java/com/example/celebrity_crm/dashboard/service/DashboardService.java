@@ -100,14 +100,14 @@ public class DashboardService {
 
     private List<DashboardResponse.Attention> attention(Long userId, LocalDate today) {
         List<DashboardResponse.Attention> list = new ArrayList<>();
-        for (Contract c : contracts.findByUserIdAndStatusOrderByDueDate(userId, "PENDING")) {
+        for (Contract c : contracts.findByUserIdAndStatusInOrderByDueDate(userId, List.of("Needs review", "Awaiting signature"))) {
             list.add(new DashboardResponse.Attention("c" + c.getId(),
                     "Sign the " + c.getTitle().toLowerCase(), c.getParty(),
                     tag(c.getDueDate(), today), tone(c.getDueDate(), today), "contracts"));
         }
-        for (Deal d : deals.findByUserIdAndStatusOrderByDueDate(userId, "PENDING")) {
+        for (Deal d : deals.findByUserIdAndStatusInOrderByDueDate(userId, List.of("In production", "Negotiating"))) {
             list.add(new DashboardResponse.Attention("d" + d.getId(),
-                    "Approve the " + d.getTitle().toLowerCase(), d.getDetail(),
+                    d.getNextStep(), d.getBrand(),
                     tag(d.getDueDate(), today), tone(d.getDueDate(), today), "deals"));
         }
         return list;
@@ -127,19 +127,21 @@ public class DashboardService {
         long waiting = 0;
         Payment next = null;
         for (Payment p : payments.findByUserId(userId)) {
-            if ("RECEIVED".equals(p.getStatus())) {
-                if (p.getPayDate() != null && p.getPayDate().getMonth() == today.getMonth()
-                        && p.getPayDate().getYear() == today.getYear()) {
+            if ("received".equals(p.getStatus())) {
+                LocalDate on = p.getReceivedOn() != null ? p.getReceivedOn() : p.getPayDate();
+                if (on != null && on.getMonth() == today.getMonth() && on.getYear() == today.getYear()) {
                     received += p.getAmount();
                 }
             } else {
-                waiting += p.getAmount();
-                if (next == null || (p.getPayDate() != null && p.getPayDate().isBefore(next.getPayDate()))) {
+                waiting += p.getAmount() - p.getReceivedAmount();
+                if (next == null || (p.getPayDate() != null && next.getPayDate() != null
+                        && p.getPayDate().isBefore(next.getPayDate()))) {
                     next = p;
                 }
             }
         }
-        String nextText = next == null ? "-" : next.getPayer() + ", " + next.getPayDate().format(DAY_MONTH);
+        String nextText = next == null ? "-"
+                : next.getPayer() + (next.getPayDate() == null ? "" : ", " + next.getPayDate().format(DAY_MONTH));
         return new DashboardResponse.Payments(received, waiting, nextText);
     }
 

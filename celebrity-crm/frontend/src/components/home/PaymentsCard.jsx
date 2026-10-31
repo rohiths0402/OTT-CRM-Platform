@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import AnimatedMoney from "../AnimatedMoney";
 import CardHeader from "./CardHeader";
 import { card } from "../../styles/cardStyles";
@@ -5,15 +6,28 @@ import {
   keyPayments,
   paymentStatus,
   paymentWhen,
-  payments,
   sumAmount,
 } from "../../data/payments";
+import { getPayments } from "../../api/paymentApi";
 import { formatMoney } from "../../utils/format";
 
 export default function PaymentsCard({ onNavigate }) {
-  const rows = keyPayments();
+  const [payments, setPayments] = useState([]);
+
+  useEffect(() => {
+    getPayments()
+      .then(setPayments)
+      .catch(() => {});
+  }, []);
+
+  const rows = keyPayments(payments);
   const stillToCome = sumAmount(
-    payments.filter((payment) => payment.status !== "received"),
+    payments
+      .filter((payment) => payment.status !== "received")
+      .map((payment) => ({
+        ...payment,
+        amount: payment.amount - payment.receivedAmount,
+      })),
   );
 
   return (
@@ -23,6 +37,10 @@ export default function PaymentsCard({ onNavigate }) {
         actionLabel="View all"
         onAction={() => onNavigate("payments")}
       />
+
+      {rows.length === 0 && (
+        <p className="mt-6 text-sm text-mute">No payments to show yet.</p>
+      )}
 
       <ul className="mt-5 space-y-3">
         {rows.map(({ slot, payment }) => {

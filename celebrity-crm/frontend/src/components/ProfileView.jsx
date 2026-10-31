@@ -87,14 +87,14 @@ export default function ProfileView({ user, onSave }) {
     }
   };
 
-  const save = (event) => {
+  const save =async (event) => {
     event.preventDefault();
     if (!form.name.trim()) {
       setError("Your display name is required.");
       return;
     }
     try {
-      onSave({
+      await onSave({
         ...form,
         name: form.name.trim(),
         phone: form.phone.trim(),

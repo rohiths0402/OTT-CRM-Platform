@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUpRight,
   CalendarDays,
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatMoney } from "../utils/format";
+import { createDeal, getDeals } from "../api/dealApi";
 
 const filters = [
   { id: "all", label: "All deals" },
@@ -31,27 +32,27 @@ function DealForm({ onClose, onCreate }) {
   const [value, setValue] = useState("");
   const [platform, setPlatform] = useState("");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     const amount = Number(value);
     if (!brand.trim() || !campaign.trim() || !platform.trim() || amount <= 0) {
       setError("Enter the brand, campaign, platform and a valid budget.");
       return;
     }
-    onCreate({
-      id: `deal-${Date.now()}`,
-      brand: brand.trim(),
-      campaign: campaign.trim(),
-      category: "New partnership",
-      platform: platform.trim(),
-      value: amount,
-      status: "Negotiating",
-      deliverables: "To be agreed",
-      dueDate: "To be scheduled",
-      contact: "Add a brand contact",
-      nextStep: "Confirm the brief and deliverables",
-    });
+    setSaving(true);
+    try {
+      await onCreate({
+        brand: brand.trim(),
+        campaign: campaign.trim(),
+        platform: platform.trim(),
+        value: amount,
+      });
+    } catch {
+      setError("Could not create the deal. Try again.");
+      setSaving(false);
+    }
   };
 
   return (
@@ -134,7 +135,8 @@ function DealForm({ onClose, onCreate }) {
           </button>
           <button
             type="submit"
-            className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
+            disabled={saving}
+            className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-60"
           >
             <Plus className="h-4 w-4" />
             Create deal
@@ -145,11 +147,25 @@ function DealForm({ onClose, onCreate }) {
   );
 }
 
-export default function BrandDealsView({ deals, onAddDeal, onNavigate }) {
+export default function BrandDealsView({ onNavigate, initialDealId }) {
+  const [deals, setDeals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [selectedDeal, setSelectedDeal] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
+
+  useEffect(() => {
+    getDeals()
+      .then((list) => {
+        setDeals(list);
+        const first = list.find((deal) => deal.id === initialDealId);
+        if (first) setSelectedDeal(first);
+      })
+      .catch(() => setError("Could not load your brand deals."))
+      .finally(() => setLoading(false));
+  }, [initialDealId]);
 
   const totals = useMemo(
     () => ({
@@ -171,13 +187,21 @@ export default function BrandDealsView({ deals, onAddDeal, onNavigate }) {
     return matchesFilter && searchText.includes(query.trim().toLowerCase());
   });
 
-  const addDeal = (deal) => {
-    onAddDeal(deal);
+  const addDeal = async (details) => {
+    const created = await createDeal(details);
+    setDeals((current) => [created, ...current]);
     setFilter("all");
     setQuery("");
     setFormOpen(false);
-    setSelectedDeal(deal);
+    setSelectedDeal(created);
   };
+
+  if (loading) {
+    return <p className="text-sm text-mute">Loading your brand deals...</p>;
+  }
+  if (error) {
+    return <p className="text-sm text-rose-400">{error}</p>;
+  }
 
   return (
     <div className="space-y-7">

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { FileSignature, Phone } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
@@ -7,9 +7,9 @@ import AttentionCard from "./home/AttentionCard";
 import MiniCalendar from "./home/MiniCalendar";
 import PaymentsCard from "./home/PaymentsCard";
 import ProjectsCard from "./home/ProjectsCard";
-import { getAttention } from "../data/attention";
-import { events } from "../data/schedule";
-import { manager } from "../data/mock";
+import { getEvents } from "../api/scheduleApi";
+import { getProjects } from "../api/projectApi";
+import { getDashboard } from "../api/dashboardApi";
 import { isSameDay, startOfDay } from "../utils/dates";
 
 const container = {
@@ -20,6 +20,8 @@ const item = {
   hidden: { opacity: 0, y: 16 },
   show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
 };
+
+const urgencyOrder = { overdue: 0, today: 1, week: 2 };
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -34,6 +36,59 @@ const todayLabel = () =>
     day: "numeric",
     month: "long",
   });
+
+function buildAttention(events, dashboard, today) {
+  const items = [];
+
+  events
+    .filter((event) => event.status === "updated" && event.date >= today)
+    .forEach((event) => {
+      items.push({
+        id: `event-${event.id}`,
+        kind: "schedule",
+        title: "Call time changed",
+        detail: `${event.project}, now ${event.callTime}`,
+        urgency: isSameDay(event.date, today) ? "today" : "week",
+        action: "Confirm",
+        target: "schedule",
+        payload: { date: event.date },
+      });
+    });
+
+  events
+    .filter((event) => event.response === "pending" && event.date >= today)
+    .forEach((event) => {
+      items.push({
+        id: `offer-${event.id}`,
+        kind: "schedule",
+        title: "New offer to answer",
+        detail: event.offer?.company
+          ? `${event.project}, ${event.offer.company}`
+          : event.project,
+        urgency: "week",
+        action: "Respond",
+        target: "schedule",
+        payload: { date: event.date },
+      });
+    });
+
+  dashboard.attention.forEach((entry) => {
+    const isContract = entry.target === "contracts";
+    const recordId = Number(entry.id.slice(1));
+    items.push({
+      id: entry.id,
+      kind: isContract ? "contract" : "approve",
+      title: entry.title,
+      detail: entry.detail,
+      urgency: entry.tag === "Today" ? "today" : "week",
+      action: isContract ? "Sign now" : "Review",
+      target: entry.target,
+      payload: isContract ? { contractId: recordId } : { dealId: recordId },
+    });
+  });
+
+  return items.sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]);
+}
 
 function QuickAction({ icon: Icon, label, hint, href, onClick }) {
   const Tag = href ? "a" : "button";
@@ -64,16 +119,53 @@ function QuickAction({ icon: Icon, label, hint, href, onClick }) {
 export default function DashboardHome({ name, onNavigate }) {
   const firstName = name.split(" ")[0];
   const today = useMemo(() => startOfDay(new Date()), []);
-  const attention = useMemo(() => getAttention(), []);
+  const [events, setEvents] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    Promise.all([getEvents(), getProjects(), getDashboard()])
+      .then(([eventList, projectList, dashboardData]) => {
+        setEvents(
+          eventList.map((event) => ({
+            ...event,
+            project: event.project || event.title,
+          })),
+        );
+        setProjects(projectList);
+        setDashboard(dashboardData);
+      })
+      .catch(() => setError("Could not load your dashboard."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <p className="text-sm text-mute">Loading your dashboard...</p>;
+  }
+  if (error) {
+    return <p className="text-sm text-rose-400">{error}</p>;
+  }
+
+  const accepted = events.filter((event) => event.response === "accepted");
+  const calendarEvents = events
+    .filter((event) => event.response !== "declined")
+    .map((event) =>
+      event.response === "pending" ? { ...event, status: "tentative" } : event,
+    );
+
+  const attention = buildAttention(events, dashboard, today);
   const contractsWaiting = attention.filter(
     (entry) => entry.kind === "contract",
   ).length;
+  const manager = dashboard.manager;
 
-  const todays = events.filter((event) => isSameDay(event.date, today));
+  const todays = accepted.filter((event) => isSameDay(event.date, today));
   const heroEvent =
     todays.find((event) => event.type === "shoot") ||
     todays[0] ||
-    events.find((event) => event.date > today);
+    accepted.find((event) => event.date > today);
 
   const openSchedule = (date) => onNavigate("schedule", { date });
 
@@ -98,18 +190,22 @@ export default function DashboardHome({ name, onNavigate }) {
       )}
 
       <motion.section variants={item} className="grid gap-3 sm:grid-cols-3">
-        <QuickAction
-          icon={Phone}
-          label="Call manager"
-          hint={manager.name}
-          href={`tel:+${manager.phone}`}
-        />
-        <QuickAction
-          icon={FaWhatsapp}
-          label="WhatsApp"
-          hint={manager.display}
-          href={`https://wa.me/${manager.phone}`}
-        />
+        {manager && (
+          <>
+            <QuickAction
+              icon={Phone}
+              label="Call manager"
+              hint={manager.name}
+              href={`tel:+${manager.phone}`}
+            />
+            <QuickAction
+              icon={FaWhatsapp}
+              label="WhatsApp"
+              hint={manager.display}
+              href={`https://wa.me/${manager.phone}`}
+            />
+          </>
+        )}
         <QuickAction
           icon={FileSignature}
           label="Contracts to sign"
@@ -128,7 +224,7 @@ export default function DashboardHome({ name, onNavigate }) {
         </motion.div>
         <motion.div variants={item}>
           <MiniCalendar
-            events={events}
+            events={calendarEvents}
             today={today}
             onPickDate={openSchedule}
           />
@@ -137,7 +233,7 @@ export default function DashboardHome({ name, onNavigate }) {
           <PaymentsCard onNavigate={onNavigate} />
         </motion.div>
         <motion.div variants={item}>
-          <ProjectsCard onNavigate={onNavigate} />
+          <ProjectsCard projects={projects} onNavigate={onNavigate} />
         </motion.div>
       </div>
     </motion.div>

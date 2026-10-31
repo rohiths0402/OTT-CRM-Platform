@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
@@ -14,6 +14,11 @@ import {
   X,
 } from "lucide-react";
 import { formatMoney } from "../utils/format";
+import {
+  createContract,
+  getContracts,
+  signContract,
+} from "../api/contractApi";
 
 const filters = [
   { id: "action", label: "Needs attention" },
@@ -34,26 +39,26 @@ function ContractForm({ onClose, onCreate }) {
   const [counterparty, setCounterparty] = useState("");
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     const amount = Number(value);
     if (!title.trim() || !counterparty.trim() || amount <= 0) {
       setError("Enter the contract name, counterparty and a valid value.");
       return;
     }
-    onCreate({
-      id: `contract-${Date.now()}`,
-      title: title.trim(),
-      counterparty: counterparty.trim(),
-      type: "New agreement",
-      status: "Draft",
-      value: amount,
-      updated: "Draft created today",
-      expiry: "Not set",
-      terms: "Terms to be added",
-      action: "Add the agreement terms before sending for review.",
-    });
+    setSaving(true);
+    try {
+      await onCreate({
+        title: title.trim(),
+        counterparty: counterparty.trim(),
+        value: amount,
+      });
+    } catch {
+      setError("Could not create the contract. Try again.");
+      setSaving(false);
+    }
   };
 
   return (
@@ -127,7 +132,8 @@ function ContractForm({ onClose, onCreate }) {
           </button>
           <button
             type="submit"
-            className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
+            disabled={saving}
+            className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-60"
           >
             <Plus className="h-4 w-4" />
             Create draft
@@ -227,17 +233,25 @@ function ContractDrawer({ contract, onClose, onSign }) {
   const [signatureData, setSignatureData] = useState("");
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
   const isSigned = contract.status === "Signed";
 
-  const submitSignature = (event) => {
+  const submitSignature = async (event) => {
     event.preventDefault();
     if (!signer.trim() || !drawn || !signatureData || !consent) {
       setError("Enter your name, draw your signature and confirm the agreement.");
       return;
     }
-    onSign(contract.id, signer.trim(), signatureData);
-    setSigning(false);
-    setError("");
+    setSaving(true);
+    try {
+      await onSign(contract.id, signer.trim(), signatureData);
+      setSigning(false);
+      setError("");
+    } catch {
+      setError("Could not save your signature. Try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -307,7 +321,7 @@ function ContractDrawer({ contract, onClose, onSign }) {
             <div className="rounded-2xl border border-aqua-400/20 bg-aqua-400/5 p-4">
               <p className="flex items-center gap-2 text-sm font-medium text-aqua-400">
                 <CheckCircle2 className="h-4 w-4" />
-                Signed in this demo workspace
+                This agreement is signed
               </p>
               {contract.signedBy && (
                 <p className="mt-2 text-xs text-mute">
@@ -332,7 +346,7 @@ function ContractDrawer({ contract, onClose, onSign }) {
                   Review & sign
                 </p>
                 <p className="mt-1 text-xs leading-5 text-mute">
-                  Check the terms above, then add your signature to this demo
+                  Check the terms above, then add your signature to this
                   agreement.
                 </p>
               </div>
@@ -359,11 +373,11 @@ function ContractDrawer({ contract, onClose, onSign }) {
                   onChange={(event) => setConsent(event.target.checked)}
                   className="mt-0.5 accent-[#d9a22b]"
                 />
-                I confirm that I reviewed these displayed terms and intend to
-                record my signature in this demo.
+                I confirm that I reviewed these terms and intend to record my
+                signature on this agreement.
               </label>
               <p className="text-[11px] leading-5 text-gold-300/80">
-                Demo only: this signature is saved in this browser session; it
+                Your signature is saved with this contract in your workspace. It
                 is not sent to a legally binding e-signature service.
               </p>
               {error && (
@@ -381,7 +395,8 @@ function ContractDrawer({ contract, onClose, onSign }) {
                 </button>
                 <button
                   type="submit"
-                  className="gold-btn inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
+                  disabled={saving}
+                  className="gold-btn inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-60"
                 >
                   <Check className="h-4 w-4" />
                   Sign agreement
@@ -394,8 +409,7 @@ function ContractDrawer({ contract, onClose, onSign }) {
                 Ready for your review?
               </p>
               <p className="mt-1 text-xs leading-5 text-mute">
-                Open the signature pad to sign this agreement in the demo
-                workspace.
+                Open the signature pad to sign this agreement.
               </p>
               <button
                 type="button"
@@ -413,15 +427,28 @@ function ContractDrawer({ contract, onClose, onSign }) {
   );
 }
 
-export default function ContractsView({
-  contracts,
-  onAddContract,
-  onSignContract,
-}) {
+export default function ContractsView({ initialContractId }) {
+  const [contracts, setContracts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState("action");
   const [query, setQuery] = useState("");
   const [selectedContract, setSelectedContract] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
+
+  useEffect(() => {
+    getContracts()
+      .then((list) => {
+        setContracts(list);
+        const first = list.find((item) => item.id === initialContractId);
+        if (first) {
+          setFilter(first.status === "Signed" ? "signed" : "action");
+          setSelectedContract(first);
+        }
+      })
+      .catch(() => setError("Could not load your contracts."))
+      .finally(() => setLoading(false));
+  }, [initialContractId]);
 
   const summary = useMemo(
     () => ({
@@ -447,13 +474,28 @@ export default function ContractsView({
     return matchesFilter && searchText.includes(query.trim().toLowerCase());
   });
 
-  const addContract = (contract) => {
-    onAddContract(contract);
+  const addContract = async (details) => {
+    const created = await createContract(details);
+    setContracts((current) => [created, ...current]);
     setFilter("action");
     setQuery("");
     setFormOpen(false);
-    setSelectedContract(contract);
+    setSelectedContract(created);
   };
+
+  const sign = async (id, signer, signatureData) => {
+    const signed = await signContract(id, signer, signatureData);
+    setContracts((current) =>
+      current.map((contract) => (contract.id === id ? signed : contract)),
+    );
+  };
+
+  if (loading) {
+    return <p className="text-sm text-mute">Loading your contracts...</p>;
+  }
+  if (error) {
+    return <p className="text-sm text-rose-400">{error}</p>;
+  }
 
   return (
     <div className="space-y-7">
@@ -636,7 +678,7 @@ export default function ContractsView({
               selectedContract
             }
             onClose={() => setSelectedContract(null)}
-            onSign={onSignContract}
+            onSign={sign}
           />
         )}
       </AnimatePresence>

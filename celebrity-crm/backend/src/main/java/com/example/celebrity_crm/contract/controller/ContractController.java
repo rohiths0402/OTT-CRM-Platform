@@ -2,7 +2,8 @@ package com.example.celebrity_crm.contract.controller;
 
 import com.example.celebrity_crm.config.CurrentUser;
 import com.example.celebrity_crm.contract.dto.ContractRequest;
-import com.example.celebrity_crm.contract.model.Contract;
+import com.example.celebrity_crm.contract.dto.ContractResponse;
+import com.example.celebrity_crm.contract.dto.SignRequest;
 import com.example.celebrity_crm.contract.service.ContractService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,24 +25,25 @@ public class ContractController {
     }
 
     @GetMapping
-    public List<Contract> list(Authentication authentication) {
+    public List<ContractResponse> list(Authentication authentication) {
         return service.list(currentUser.id(authentication));
     }
 
     @PostMapping
-    public Contract add(Authentication authentication, @Valid @RequestBody ContractRequest request) {
+    public ContractResponse add(Authentication authentication, @Valid @RequestBody ContractRequest request) {
         return service.add(currentUser.id(authentication), request);
     }
 
     @PutMapping("/{id}")
-    public Contract update(Authentication authentication, @PathVariable Long id,
-                           @Valid @RequestBody ContractRequest request) {
+    public ContractResponse update(Authentication authentication, @PathVariable Long id,
+                                   @Valid @RequestBody ContractRequest request) {
         return service.update(currentUser.id(authentication), id, request);
     }
 
     @PutMapping("/{id}/sign")
-    public Contract sign(Authentication authentication, @PathVariable Long id) {
-        return service.sign(currentUser.id(authentication), id);
+    public ContractResponse sign(Authentication authentication, @PathVariable Long id,
+                                 @Valid @RequestBody SignRequest request) {
+        return service.sign(currentUser.id(authentication), id, request);
     }
 
     @DeleteMapping("/{id}")

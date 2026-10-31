@@ -1,6 +1,5 @@
 package com.example.celebrity_crm.notification.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -18,6 +17,7 @@ public class Notification {
 
     private String title;
     private String message;
+    private String target;
     private boolean seen;
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -26,11 +26,10 @@ public class Notification {
     public void setUserId(Long userId) { this.userId = userId; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
-
-    @JsonProperty("desc")
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
-
+    public String getTarget() { return target; }
+    public void setTarget(String target) { this.target = target; }
     public boolean isSeen() { return seen; }
     public void setSeen(boolean seen) { this.seen = seen; }
     public LocalDateTime getCreatedAt() { return createdAt; }

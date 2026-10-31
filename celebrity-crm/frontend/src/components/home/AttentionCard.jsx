@@ -57,7 +57,7 @@ export default function AttentionCard({ items, onNavigate }) {
                   <Icon className="h-5 w-5" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-ivory">
+                  <span className="block text-sm font-medium leading-snug text-ivory">
                     {item.title}
                   </span>
                   <span className="block truncate text-xs text-mute">
@@ -71,12 +71,7 @@ export default function AttentionCard({ items, onNavigate }) {
                 </span>
                 <button
                   type="button"
-                  onClick={() =>
-                    onNavigate(
-                      item.target,
-                      item.date ? { date: item.date } : undefined,
-                    )
-                  }
+                  onClick={() => onNavigate(item.target, item.payload)}
                   className="shrink-0 rounded-lg bg-gold-400 px-3.5 py-2 text-xs font-bold text-ink-950 transition duration-200 hover:brightness-110 hover:shadow-[0_6px_18px_-6px_rgba(217,162,43,0.7)]"
                 >
                   {item.action}

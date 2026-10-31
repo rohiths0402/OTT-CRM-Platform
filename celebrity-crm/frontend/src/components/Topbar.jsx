@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bell, Check, Menu, MoveUpRight } from "lucide-react";
 import Avatar from "./Avatar";
-import { notifications as initialNotifications } from "../data/mock";
+import {
+  getNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "../api/notificationApi";
 
 export default function Topbar({
   title,
@@ -13,9 +17,22 @@ export default function Topbar({
   onNavigate,
 }) {
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState(initialNotifications);
+  const [items, setItems] = useState([]);
   const wrapperRef = useRef(null);
   const unread = items.filter((item) => !item.read).length;
+
+  const load = () =>
+    getNotifications()
+      .then(setItems)
+      .catch(() => {});
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  useEffect(() => {
+    if (open) load();
+  }, [open]);
 
   useEffect(() => {
     const handlePointer = (event) => {
@@ -33,8 +50,10 @@ export default function Topbar({
     };
   }, []);
 
-  const markAllRead = () =>
+  const markAllRead = () => {
     setItems((previous) => previous.map((item) => ({ ...item, read: true })));
+    markAllNotificationsRead().catch(() => {});
+  };
 
   const openNotification = (item) => {
     setItems((previous) =>
@@ -42,8 +61,9 @@ export default function Topbar({
         entry.id === item.id ? { ...entry, read: true } : entry,
       ),
     );
+    markNotificationRead(item.id).catch(() => {});
     setOpen(false);
-    onNavigate(item.target, item.payload);
+    if (item.target) onNavigate(item.target);
   };
 
   return (
@@ -121,6 +141,11 @@ export default function Topbar({
                     </button>
                   )}
                 </div>
+                {items.length === 0 && (
+                  <p className="py-6 text-center text-sm text-mute">
+                    No notifications yet.
+                  </p>
+                )}
                 <ul className="mt-3 space-y-2">
                   {items.map((item) => (
                     <li

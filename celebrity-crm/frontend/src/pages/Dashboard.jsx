@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import Sidebar from "../components/Sidebar";
-import Topbar from "../components/TopBar";
+import Topbar from "../components/Topbar";
 import DashboardHome from "../components/DashboardHome";
 import ScheduleView from "../components/schedule/ScheduleView";
 import ProjectsView from "../components/projects/ProjectsView";
@@ -12,10 +12,8 @@ import ContractsView from "../components/ContractsView";
 import ProfileView from "../components/ProfileView";
 import SecurityView from "../components/SecurityView";
 import { useAuth } from "../context/AuthContext";
+import { getProfile, saveProfile } from "../api/profileApi";
 import { navItems } from "../data/navigation";
-import { initialDeals } from "../data/brandDeals";
-import { initialContracts } from "../data/contracts";
-import { payments as initialPayments } from "../data/payments";
 
 export default function Dashboard() {
   const { user, signOut, updateUser } = useAuth();
@@ -23,10 +21,13 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("home");
   const [context, setContext] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [deals, setDeals] = useState(initialDeals);
-  const [contracts, setContracts] = useState(initialContracts);
-  const [paymentItems, setPaymentItems] = useState(initialPayments);
-  const [outgoingPayments, setOutgoingPayments] = useState([]);
+
+  useEffect(() => {
+    getProfile()
+      .then(updateUser)
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const name = user?.name || "Guest";
   const current =
@@ -43,6 +44,11 @@ export default function Dashboard() {
     navigate("/", { replace: true });
   };
 
+  const handleSaveProfile = async (form) => {
+    const saved = await saveProfile(form);
+    updateUser(saved);
+  };
+
   const renderContent = () => {
     if (activeTab === "home")
       return <DashboardHome name={name} onNavigate={select} />;
@@ -56,77 +62,20 @@ export default function Dashboard() {
         />
       );
     if (activeTab === "payments")
-      return (
-        <PaymentsView
-          initialPaymentId={context?.paymentId}
-          paymentItems={paymentItems}
-          outgoingPayments={outgoingPayments}
-          onRecordOutgoing={(payment) =>
-            setOutgoingPayments((currentPayments) => [
-              payment,
-              ...currentPayments,
-            ])
-          }
-          onSettle={(paymentId, settlement) =>
-            setPaymentItems((currentPayments) =>
-              currentPayments.map((payment) =>
-                payment.id === paymentId
-                  ? {
-                      ...payment,
-                      status: settlement.isComplete ? "received" : payment.status,
-                      date: settlement.isComplete
-                        ? settlement.date
-                        : payment.date,
-                      reference: settlement.reference,
-                      method: settlement.method,
-                      receivedAmount:
-                        (payment.receivedAmount || 0) + settlement.amount,
-                      lastPaidDate: settlement.date,
-                    }
-                  : payment,
-              ),
-            )
-          }
-        />
-      );
+      return <PaymentsView initialPaymentId={context?.paymentId} />;
     if (activeTab === "deals")
       return (
         <BrandDealsView
-          deals={deals}
-          onAddDeal={(deal) => setDeals((currentDeals) => [deal, ...currentDeals])}
           onNavigate={select}
+          initialDealId={context?.dealId}
         />
       );
     if (activeTab === "contracts")
-      return (
-        <ContractsView
-          contracts={contracts}
-          onAddContract={(contract) =>
-            setContracts((currentContracts) => [contract, ...currentContracts])
-          }
-          onSignContract={(contractId, signer, signatureData) =>
-            setContracts((currentContracts) =>
-              currentContracts.map((contract) =>
-                contract.id === contractId
-                  ? {
-                      ...contract,
-                      status: "Signed",
-                      signedBy: signer,
-                      signatureData,
-                      signedAt: new Date().toLocaleDateString("en-IN"),
-                      updated: "Signed just now",
-                      action: "Signed in this demo workspace.",
-                    }
-                  : contract,
-              ),
-            )
-          }
-        />
-      );
+      return <ContractsView initialContractId={context?.contractId} />;
     if (activeTab === "security")
       return <SecurityView email={user?.email} onSignOut={handleSignOut} />;
     if (activeTab === "profile")
-      return <ProfileView user={user} onSave={updateUser} />;
+      return <ProfileView user={user} onSave={handleSaveProfile} />;
     return null;
   };
 

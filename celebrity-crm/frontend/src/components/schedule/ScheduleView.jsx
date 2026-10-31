@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarDays, List } from "lucide-react";
 import CalendarGrid from "./CalendarGrid";
 import DayDetails from "./DayDetails";
 import AgendaList from "./AgendaList";
-import { eventTypes, events } from "../../data/schedule";
+import { eventTypes } from "../../data/schedule";
+import { getEvents, respondToEvent } from "../../api/scheduleApi";
 import { isSameDay, startOfDay } from "../../utils/dates";
 
 const views = [
@@ -24,6 +25,10 @@ const filters = [
 export default function ScheduleView({ initialDate }) {
   const today = useMemo(() => startOfDay(new Date()), []);
   const start = initialDate ? startOfDay(initialDate) : today;
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [view, setView] = useState("month");
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState(start);
@@ -31,17 +36,38 @@ export default function ScheduleView({ initialDate }) {
     () => new Date(start.getFullYear(), start.getMonth(), 1),
   );
 
+  useEffect(() => {
+    getEvents()
+      .then(setEvents)
+      .catch(() => setError("Could not load your schedule."))
+      .finally(() => setLoading(false));
+  }, []);
+
   const filtered = useMemo(
     () =>
       filter === "all"
         ? events
         : events.filter((event) => event.type === filter),
-    [filter],
+    [events, filter],
   );
 
   const eventsOn = (date) =>
     filtered.filter((event) => isSameDay(event.date, date));
   const nextEvent = filtered.find((event) => event.date > selected);
+
+  const respond = async (id, action) => {
+    setNotice("");
+    try {
+      const updated = await respondToEvent(id, action);
+      setEvents((current) =>
+        current.map((event) => (event.id === id ? updated : event)),
+      );
+    } catch (err) {
+      setNotice(
+        err.response?.data?.message || "Could not save your answer. Try again.",
+      );
+    }
+  };
 
   const pickDate = (date) => {
     setSelected(date);
@@ -129,43 +155,52 @@ export default function ScheduleView({ initialDate }) {
         ))}
       </div>
 
+      {notice && <p className="mt-4 text-sm text-rose-400">{notice}</p>}
+
       <div className="mt-6">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={view}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {view === "month" ? (
-              <div className="grid items-start gap-6 lg:grid-cols-[1.45fr_1fr]">
-                <CalendarGrid
-                  monthStart={monthStart}
-                  selected={selected}
+        {loading ? (
+          <p className="text-sm text-mute">Loading your schedule...</p>
+        ) : error ? (
+          <p className="text-sm text-rose-400">{error}</p>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={view}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {view === "month" ? (
+                <div className="grid items-start gap-6 lg:grid-cols-[1.45fr_1fr]">
+                  <CalendarGrid
+                    monthStart={monthStart}
+                    selected={selected}
+                    today={today}
+                    eventsOn={eventsOn}
+                    onSelect={pickDate}
+                    onPrev={() => shiftMonth(-1)}
+                    onNext={() => shiftMonth(1)}
+                  />
+                  <DayDetails
+                    date={selected}
+                    today={today}
+                    events={eventsOn(selected)}
+                    nextEvent={nextEvent}
+                    onJump={pickDate}
+                    onRespond={respond}
+                  />
+                </div>
+              ) : (
+                <AgendaList
+                  events={filtered}
                   today={today}
-                  eventsOn={eventsOn}
-                  onSelect={pickDate}
-                  onPrev={() => shiftMonth(-1)}
-                  onNext={() => shiftMonth(1)}
+                  onPick={pickFromList}
                 />
-                <DayDetails
-                  date={selected}
-                  today={today}
-                  events={eventsOn(selected)}
-                  nextEvent={nextEvent}
-                  onJump={pickDate}
-                />
-              </div>
-            ) : (
-              <AgendaList
-                events={filtered}
-                today={today}
-                onPick={pickFromList}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </div>
   );

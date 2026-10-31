@@ -1,8 +1,9 @@
 package com.example.celebrity_crm.notification.controller;
 
 import com.example.celebrity_crm.config.CurrentUser;
-import com.example.celebrity_crm.notification.model.Notification;
+import com.example.celebrity_crm.notification.dto.NotificationResponse;
 import com.example.celebrity_crm.notification.service.NotificationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,12 +22,18 @@ public class NotificationController {
     }
 
     @GetMapping
-    public List<Notification> list(Authentication authentication) {
+    public List<NotificationResponse> list(Authentication authentication) {
         return service.list(currentUser.id(authentication));
     }
 
     @PutMapping("/{id}/read")
-    public Notification markRead(Authentication authentication, @PathVariable Long id) {
+    public NotificationResponse markRead(Authentication authentication, @PathVariable Long id) {
         return service.markRead(currentUser.id(authentication), id);
+    }
+
+    @PutMapping("/read-all")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void markAllRead(Authentication authentication) {
+        service.markAllRead(currentUser.id(authentication));
     }
 }

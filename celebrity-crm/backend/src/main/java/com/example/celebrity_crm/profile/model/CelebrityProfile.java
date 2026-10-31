@@ -17,6 +17,14 @@ public class CelebrityProfile {
     private String imageUrl;
     private String managerName;
     private String managerPhone;
+    private String phone;
+    private String location;
+
+    @Column(length = 500)
+    private String bio;
+
+    private String instagram;
+    private String youtube;
 
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
@@ -29,4 +37,14 @@ public class CelebrityProfile {
     public void setManagerName(String managerName) { this.managerName = managerName; }
     public String getManagerPhone() { return managerPhone; }
     public void setManagerPhone(String managerPhone) { this.managerPhone = managerPhone; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
+    public String getInstagram() { return instagram; }
+    public void setInstagram(String instagram) { this.instagram = instagram; }
+    public String getYoutube() { return youtube; }
+    public void setYoutube(String youtube) { this.youtube = youtube; }
 }

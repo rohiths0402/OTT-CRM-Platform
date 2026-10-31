@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
 import CardHeader from "./CardHeader";
 import { card } from "../../styles/cardStyles";
-import { projects } from "../../data/projects";
 
-export default function ProjectsCard({ onNavigate }) {
+export default function ProjectsCard({ projects, onNavigate }) {
   const active = projects
     .filter((project) => project.status === "active")
     .slice(0, 3);
@@ -15,6 +14,10 @@ export default function ProjectsCard({ onNavigate }) {
         actionLabel="View all"
         onAction={() => onNavigate("projects")}
       />
+
+      {active.length === 0 && (
+        <p className="mt-6 text-sm text-mute">No active projects right now.</p>
+      )}
 
       <ul className="mt-5 space-y-3">
         {active.map((project, index) => (
