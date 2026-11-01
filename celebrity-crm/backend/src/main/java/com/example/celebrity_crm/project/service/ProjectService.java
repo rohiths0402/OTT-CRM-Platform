@@ -129,7 +129,7 @@ public class ProjectService {
                 p.getDirector(), p.getStatus(), p.getPhase(), p.getProgress(), p.getProgressLabel(),
                 p.getReleaseLabel(), nextCall(p, today),
                 new ProjectResponse.Money(p.getMoneyTotal(), p.getMoneyReceived(), p.getNextPayment()),
-                p.getContractStatus(), people);
+                p.getContractStatus(), people, p.getPosterUrl());
     }
 
     private String nextCall(Project project, LocalDate today) {

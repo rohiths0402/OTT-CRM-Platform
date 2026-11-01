@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Clapperboard, Clock, Wallet } from "lucide-react";
 import { formatMoney } from "../../utils/format";
@@ -9,7 +10,9 @@ const phaseStyles = {
 };
 
 export default function ProjectCard({ project, index, onOpen }) {
+  const [broken, setBroken] = useState(false);
   const pending = project.money.total - project.money.received;
+  const hasPoster = Boolean(project.poster) && !broken;
 
   return (
     <motion.button
@@ -23,17 +26,29 @@ export default function ProjectCard({ project, index, onOpen }) {
       className="group overflow-hidden rounded-3xl border border-line bg-ink-900 text-left transition duration-200 hover:-translate-y-1 hover:border-gold-400/40"
     >
       <div
-        className={`relative h-28 overflow-hidden bg-gradient-to-br ${project.tint}`}
+        className={`relative overflow-hidden bg-gradient-to-br ${project.tint} ${hasPoster ? "h-60" : "h-28"}`}
       >
-        <Clapperboard
-          className="absolute -right-3 -top-3 h-28 w-28 text-white/[0.07] transition duration-500 group-hover:rotate-6 group-hover:scale-110"
-          strokeWidth={1}
-        />
-        <span className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs text-ivory backdrop-blur">
+        {hasPoster ? (
+          <>
+            <img
+              src={project.poster}
+              alt={`${project.title} poster`}
+              onError={() => setBroken(true)}
+              className="absolute inset-0 h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
+            />
+            <span className="absolute inset-0 bg-gradient-to-t from-ink-900 via-black/10 to-black/40" />
+          </>
+        ) : (
+          <Clapperboard
+            className="absolute -right-3 -top-3 h-28 w-28 text-white/[0.07] transition duration-500 group-hover:rotate-6 group-hover:scale-110"
+            strokeWidth={1}
+          />
+        )}
+        <span className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs text-ivory backdrop-blur">
           {project.type}
         </span>
         <span
-          className={`absolute bottom-4 left-4 rounded-full border px-3 py-1 text-xs font-medium ${phaseStyles[project.status]}`}
+          className={`absolute bottom-4 left-4 rounded-full border px-3 py-1 text-xs font-medium backdrop-blur ${phaseStyles[project.status]}`}
         >
           {project.phase}
         </span>
@@ -46,6 +61,9 @@ export default function ProjectCard({ project, index, onOpen }) {
         <p className="mt-1 text-sm text-mute">
           {project.role}, {project.company}
         </p>
+        {project.director && (
+          <p className="mt-1 text-xs text-mute">Directed by {project.director}</p>
+        )}
 
         <div className="mt-5">
           <div className="flex items-center justify-between text-xs">

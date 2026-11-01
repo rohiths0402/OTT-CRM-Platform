@@ -27,6 +27,7 @@ public class Project {
     private long moneyReceived;
     private String nextPayment;
     private String contractStatus;
+    private String posterUrl;
 
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
@@ -59,4 +60,6 @@ public class Project {
     public void setNextPayment(String nextPayment) { this.nextPayment = nextPayment; }
     public String getContractStatus() { return contractStatus; }
     public void setContractStatus(String contractStatus) { this.contractStatus = contractStatus; }
+    public String getPosterUrl() { return posterUrl; }
+    public void setPosterUrl(String posterUrl) { this.posterUrl = posterUrl; }
 }

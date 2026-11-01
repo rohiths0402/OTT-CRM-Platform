@@ -17,7 +17,8 @@ public record ProjectResponse(
         String nextCall,
         Money money,
         String contract,
-        List<Member> team) {
+        List<Member> team,
+        String poster) {
 
     public record Money(long total, long received, String next) {}
 

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import AnimatedMoney from "../AnimatedMoney";
+import PaymentBill from "./PaymentBill";
 import {
   paymentStatus,
   paymentWhen,
@@ -29,7 +30,8 @@ import {
   settlePayment,
 } from "../../api/paymentApi";
 import { getDashboard } from "../../api/dashboardApi";
-import { payOutWithRazorpay, payWithRazorpay } from "../../utils/razorpay";
+import { payOutWithRazorpay } from "../../utils/razorpay";
+import { useAuth } from "../../context/AuthContext";
 import { formatMoney } from "../../utils/format";
 
 const tabs = [
@@ -290,37 +292,13 @@ function MakePaymentForm({ onClose, onRecord, onPaid }) {
   );
 }
 
-function SettlementForm({ payment, onClose, onSettle, onPaid }) {
+function SettlementForm({ payment, onClose, onSettle }) {
   const remaining = Math.max(0, payment.amount - payment.receivedAmount);
   const [amount, setAmount] = useState(String(remaining));
   const [method, setMethod] = useState("UPI");
   const [reference, setReference] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const payOnline = async () => {
-    const paidAmount = Number(amount);
-    if (
-      !Number.isInteger(paidAmount) ||
-      paidAmount <= 0 ||
-      paidAmount > remaining
-    ) {
-      setError("Enter a whole amount up to the remaining balance.");
-      return;
-    }
-    setError("");
-    setSaving(true);
-    try {
-      const updated = await payWithRazorpay(payment, paidAmount);
-      if (updated) onPaid(updated);
-      else setSaving(false);
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Razorpay payment failed. Try again.",
-      );
-      setSaving(false);
-    }
-  };
 
   const submit = async (event) => {
     event.preventDefault();
@@ -434,22 +412,13 @@ function SettlementForm({ payment, onClose, onSettle, onPaid }) {
             {error}
           </p>
         )}
-        <div className="mt-6 flex flex-wrap justify-end gap-3">
+        <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
             className="rounded-xl border border-line px-4 py-2.5 text-sm text-mute hover:text-ivory"
           >
             Cancel
-          </button>
-          <button
-            type="button"
-            onClick={payOnline}
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl border border-gold-400/40 bg-gold-400/10 px-4 py-2.5 text-sm font-semibold text-gold-300 transition hover:bg-gold-400/20 disabled:opacity-60"
-          >
-            <CreditCard className="h-4 w-4" />
-            Pay with Razorpay (test)
           </button>
           <button
             type="submit"
@@ -465,7 +434,13 @@ function SettlementForm({ payment, onClose, onSettle, onPaid }) {
   );
 }
 
-function PaymentDetails({ payment, manager, onClose, onRecordPayment }) {
+function PaymentDetails({
+  payment,
+  manager,
+  onClose,
+  onRecordPayment,
+  onViewBill,
+}) {
   const status = paymentStatus[payment.status];
   const Icon = status.icon;
   const managerFirstName = manager ? manager.name.split(" ")[0] : "";
@@ -571,6 +546,16 @@ function PaymentDetails({ payment, manager, onClose, onRecordPayment }) {
                 <CreditCard className="h-4 w-4" />
                 Record payment received
               </button>
+              {payment.receivedAmount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => onViewBill(payment)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-line px-4 py-3 text-sm font-medium text-ivory transition hover:border-aqua-400/40"
+                >
+                  <FileText className="h-4 w-4" />
+                  View bill for received amount
+                </button>
+              )}
               {manager && (
                 <a
                   href={`https://wa.me/${manager.phone}?text=${encodeURIComponent(message)}`}
@@ -600,11 +585,11 @@ function PaymentDetails({ payment, manager, onClose, onRecordPayment }) {
               )}
               <button
                 type="button"
-                onClick={() => window.print()}
+                onClick={() => onViewBill(payment)}
                 className="mt-4 inline-flex items-center gap-2 rounded-lg border border-line px-3 py-2 text-xs text-ivory transition hover:border-aqua-400/40"
               >
                 <FileText className="h-3.5 w-3.5" />
-                Print payment record
+                View bill
               </button>
             </div>
           )}
@@ -615,6 +600,7 @@ function PaymentDetails({ payment, manager, onClose, onRecordPayment }) {
 }
 
 export default function PaymentsView({ initialPaymentId }) {
+  const { user } = useAuth();
   const [paymentItems, setPaymentItems] = useState([]);
   const [outgoingPayments, setOutgoingPayments] = useState([]);
   const [manager, setManager] = useState(null);
@@ -624,6 +610,7 @@ export default function PaymentsView({ initialPaymentId }) {
   const [query, setQuery] = useState("");
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [settlingPayment, setSettlingPayment] = useState(null);
+  const [billPayment, setBillPayment] = useState(null);
   const [makePaymentOpen, setMakePaymentOpen] = useState(false);
   const [notice, setNotice] = useState("");
 
@@ -704,7 +691,7 @@ export default function PaymentsView({ initialPaymentId }) {
     finishSettle(updated);
   };
 
-    const finishOutgoing = (saved) => {
+  const finishOutgoing = (saved) => {
     setOutgoingPayments((current) => [saved, ...current]);
     setMakePaymentOpen(false);
     setTab("sent");
@@ -715,6 +702,7 @@ export default function PaymentsView({ initialPaymentId }) {
     const saved = await createSentPayment(details);
     finishOutgoing(saved);
   };
+
   const summary = [
     { label: "Received", value: received, tone: "text-aqua-400", icon: ArrowDownLeft },
     { label: "Sent", value: sentTotal, tone: "text-rose-300", icon: Send },
@@ -1012,6 +1000,7 @@ export default function PaymentsView({ initialPaymentId }) {
             manager={manager}
             onClose={() => setSelectedPayment(null)}
             onRecordPayment={(payment) => setSettlingPayment(payment)}
+            onViewBill={(payment) => setBillPayment(payment)}
           />
         )}
         {settlingPayment && (
@@ -1020,10 +1009,17 @@ export default function PaymentsView({ initialPaymentId }) {
             payment={settlingPayment}
             onClose={() => setSettlingPayment(null)}
             onSettle={settle}
-            onPaid={finishSettle}
           />
         )}
       </AnimatePresence>
+
+      {billPayment && (
+        <PaymentBill
+          payment={billPayment}
+          name={user?.name || "Celebrity"}
+          onClose={() => setBillPayment(null)}
+        />
+      )}
     </div>
   );
 }
