@@ -97,7 +97,9 @@ public class ProjectService {
         project.setProgress(request.progress());
         project.setProgressLabel(request.progressLabel());
         project.setReleaseLabel(request.release());
-
+        if (request.poster() != null && !request.poster().isBlank()) {
+            project.setPosterUrl(request.poster().trim());
+        }
         ProjectRequest.Money money = request.money();
         project.setMoneyTotal(money == null ? 0 : money.total());
         project.setMoneyReceived(money == null ? 0 : money.received());

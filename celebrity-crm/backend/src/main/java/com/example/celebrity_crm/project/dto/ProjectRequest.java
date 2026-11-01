@@ -20,7 +20,8 @@ public record ProjectRequest(
         String release,
         Money money,
         @Pattern(regexp = "signed|awaiting|draft") String contract,
-        List<Member> team) {
+        List<Member> team,
+        String poster) {
 
     public record Money(long total, long received, String next) {}
 
