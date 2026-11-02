@@ -1,0 +1,4 @@
+/* Page-specific styles for PreferencesPage. */
+@import '../preferences.css';
+
+.crm-pref-grid { align-items: start; }

@@ -85,7 +85,6 @@ export default function LoginPage() {
 
             <p className="login-security">
               <ShieldCheck size={14} />
-              PRIVATE AND SECURE WORKSPACE
             </p>
           </section>
         </div>

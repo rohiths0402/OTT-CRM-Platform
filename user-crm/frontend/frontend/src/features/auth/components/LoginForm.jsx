@@ -66,14 +66,7 @@ export default function LoginForm() {
           <div className="password-label-row">
             <label htmlFor="password">Password</label>
 
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              disabled={loading}
-              className="forgot-button"
-            >
-              Forgot password?
-            </button>
+            
           </div>
 
           <div className="login-input-wrap">
@@ -106,7 +99,6 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Remember me */}
         <label className="remember-row">
           <input
             type="checkbox"
@@ -115,8 +107,6 @@ export default function LoginForm() {
           />
           <span>Remember me</span>
         </label>
-
-        {/* Submit */}
         <button
           type="submit"
           disabled={loading}
@@ -129,7 +119,6 @@ export default function LoginForm() {
           {!loading && <ArrowRight size={17} />}
         </button>
 
-        {/* API feedback */}
         {notice && (
           <p
             role="status"

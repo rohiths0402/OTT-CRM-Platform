@@ -1,0 +1,4 @@
+/* Component-specific form styles for EngagementForm. */
+.crm-modal { box-shadow: 0 20px 70px #0009; }
+.crm-form input:focus, .crm-form select:focus { border-color: #c5a464; }
+.crm-modal-actions button:disabled { opacity: .55; cursor: not-allowed; }

@@ -1,21 +1,54 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 
 const AuthContext = createContext(null)
 
+function getStoredUser() {
+  try {
+    const storedUser = sessionStorage.getItem('loopDemoUser')
+    return storedUser ? JSON.parse(storedUser) : null
+  } catch {
+    return null
+  }
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(getStoredUser)
 
-  const value = useMemo(() => ({
-    user,
-    setAuthenticatedUser: setUser,
-    clearAuthenticatedUser: () => setUser(null),
-  }), [user])
+  const value = useMemo(
+    () => ({
+      user,
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+      setAuthenticatedUser: (newUser) => {
+        setUser(newUser)
+      },
+
+      clearAuthenticatedUser: () => {
+        sessionStorage.removeItem('loopDemoUser')
+        setUser(null)
+      },
+    }),
+    [user]
+  )
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth must be used inside AuthProvider')
+
+  if (!context) {
+    throw new Error('useAuth must be used inside AuthProvider')
+  }
+
   return context
 }

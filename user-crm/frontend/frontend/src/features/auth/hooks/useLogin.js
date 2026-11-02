@@ -1,6 +1,8 @@
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login, requestPasswordReset } from '../services/authService'
+
+import { mockLogin } from '../services/mockAuth'
 import { useAuth } from '../context/AuthContext'
 
 const ROLE_REDIRECTS = {
@@ -29,55 +31,73 @@ export function useLogin() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setNotice('')
+
+    if (loading) return
+
     setLoading(true)
 
     try {
-      const result = await login({ email: email.trim(), password, remember })
-      const authenticatedUser = result.user || {
-        id: result.id,
-        email: result.email || email.trim(),
-        role: result.role,
-      }
-      const role = String(authenticatedUser.role || '').toLowerCase()
+      const result = await mockLogin({
+        email,
+        password,
+      })
+
+      const authenticatedUser = result.user
+      const role = String(authenticatedUser.role || '')
+        .trim()
+        .toLowerCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_')
+
       const destination = ROLE_REDIRECTS[role]
 
       if (!destination) {
-        notify('Your account role is not recognized. Please contact your administrator.', 'error')
+        notify('Account role is not recognized.', 'error')
         return
       }
 
-      setAuthenticatedUser({ ...authenticatedUser, role })
+      setAuthenticatedUser({
+        ...authenticatedUser,
+        role,
+      })
+
+      // Demo authentication only
+      sessionStorage.setItem(
+        'loopDemoUser',
+        JSON.stringify({
+          ...authenticatedUser,
+          role,
+        })
+      )
+
       navigate(destination, { replace: true })
     } catch (error) {
-      notify(error.message || 'Unable to sign in. Please try again.', 'error')
+      notify(error.message || 'Unable to sign in.', 'error')
     } finally {
       setLoading(false)
     }
   }
 
   const handleForgotPassword = async () => {
-    if (!email.trim()) {
-      notify('Enter your work email first to request a password reset.', 'error')
-      return
-    }
-
-    setLoading(true)
-    try {
-      await requestPasswordReset(email.trim())
-      notify('If an account exists for this email, password reset instructions will be sent.')
-    } catch (error) {
-      notify(error.message || 'Unable to process the password reset request.', 'error')
-    } finally {
-      setLoading(false)
-    }
+    notify(
+      'Password reset is unavailable in demo mode.',
+      'info'
+    )
   }
 
   return {
-    email, setEmail,
-    password, setPassword,
-    showPassword, setShowPassword,
-    remember, setRemember,
-    loading, notice, noticeType,
-    handleSubmit, handleForgotPassword,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    showPassword,
+    setShowPassword,
+    remember,
+    setRemember,
+    loading,
+    notice,
+    noticeType,
+    handleSubmit,
+    handleForgotPassword,
   }
 }

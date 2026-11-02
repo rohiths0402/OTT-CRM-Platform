@@ -99,9 +99,7 @@
 }
 
 .login-submit {
-  @apply group flex h-12 w-full items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-all;
-  color: #090909;
-  background: linear-gradient(110deg, #b89451, #dfc487);
+  @apply flex h-12 w-full items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition-all;
 }
 
 .login-submit:hover {
