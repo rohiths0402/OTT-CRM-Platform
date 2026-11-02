@@ -24,13 +24,11 @@ import {
   sumAmount,
 } from "../../data/payments";
 import {
-  createSentPayment,
   getPayments,
   getSentPayments,
   settlePayment,
 } from "../../api/paymentApi";
 import { getDashboard } from "../../api/dashboardApi";
-import { payOutWithRazorpay } from "../../utils/razorpay";
 import { useAuth } from "../../context/AuthContext";
 import { formatMoney } from "../../utils/format";
 
@@ -48,249 +46,6 @@ const sortPayments = (items) =>
       return rank[a.status] - rank[b.status];
     return a.status === "received" ? b.date - a.date : a.date - b.date;
   });
-
-function MakePaymentForm({ onClose, onRecord, onPaid }) {
-  const [recipient, setRecipient] = useState("");
-  const [upiId, setUpiId] = useState("");
-  const [amount, setAmount] = useState("");
-  const [note, setNote] = useState("");
-  const [reference, setReference] = useState("");
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  const validUpiId = /^[a-zA-Z0-9._-]{2,256}@[a-zA-Z0-9.-]{2,64}$/;
-  const paymentLink = `upi://pay?${new URLSearchParams({
-    pa: upiId,
-    pn: recipient,
-    am: Number(amount).toFixed(2),
-    cu: "INR",
-    tn: note || "Payment",
-  }).toString()}`;
-
-  const continueToPayment = (event) => {
-    event.preventDefault();
-    if (!recipient.trim()) {
-      setError("Enter the name of the person or team you are paying.");
-      return;
-    }
-    if (!validUpiId.test(upiId.trim())) {
-      setError("Enter a valid UPI ID, for example name@bank.");
-      return;
-    }
-    if (!Number.isInteger(Number(amount)) || Number(amount) <= 0) {
-      setError("Enter a payment amount in whole rupees, greater than zero.");
-      return;
-    }
-    setError("");
-    setReady(true);
-  };
-
-  const recordPayment = async (event) => {
-    event.preventDefault();
-    if (!reference.trim()) {
-      setError("Add the UPI transaction reference after you complete payment.");
-      return;
-    }
-    setSaving(true);
-    try {
-      await onRecord({
-        recipient: recipient.trim(),
-        upiId: upiId.trim(),
-        amount: Number(amount),
-        note: note.trim(),
-        reference: reference.trim(),
-      });
-    } catch {
-      setError("Could not save this payment. Try again.");
-      setSaving(false);
-    }
-  };
-
-  const payTest = async () => {
-    setError("");
-    setSaving(true);
-    try {
-      const saved = await payOutWithRazorpay({
-        recipient: recipient.trim(),
-        upiId: upiId.trim(),
-        amount: Number(amount),
-        note: note.trim(),
-      });
-      if (saved) onPaid(saved);
-      else setSaving(false);
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Razorpay payment failed. Try again.",
-      );
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[80] grid place-items-center bg-black/75 p-4 backdrop-blur-md">
-      <form
-        onSubmit={ready ? recordPayment : continueToPayment}
-        className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-line bg-ink-900 p-6 shadow-2xl sm:p-8"
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-rose-300">
-              UPI transfer
-            </p>
-            <h3 className="mt-2 font-display text-3xl text-ivory">
-              Make a payment
-            </h3>
-            <p className="mt-1 text-sm text-mute">
-              Send money to a person or your crew.
-            </p>
-          </div>
-          <button
-            type="button"
-            aria-label="Close make payment"
-            onClick={onClose}
-            className="rounded-full p-2 text-mute transition hover:bg-white/5 hover:text-ivory"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {!ready ? (
-          <div className="mt-6 space-y-4">
-            <label className="block text-xs text-mute">
-              Recipient name
-              <input
-                autoFocus
-                value={recipient}
-                onChange={(event) => setRecipient(event.target.value)}
-                placeholder="e.g. Arjun — manager"
-                className="mt-2 w-full rounded-xl border border-line bg-ink-800 px-4 py-3 text-sm text-ivory placeholder:text-mute/70"
-              />
-            </label>
-            <label className="block text-xs text-mute">
-              UPI ID
-              <input
-                autoComplete="off"
-                value={upiId}
-                onChange={(event) => setUpiId(event.target.value)}
-                placeholder="name@bank"
-                className="mt-2 w-full rounded-xl border border-line bg-ink-800 px-4 py-3 text-sm text-ivory placeholder:text-mute/70"
-              />
-            </label>
-            <label className="block text-xs text-mute">
-              Amount (₹)
-              <input
-                type="number"
-                min="1"
-                step="1"
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
-                placeholder="5000"
-                className="mt-2 w-full rounded-xl border border-line bg-ink-800 px-4 py-3 text-sm text-ivory placeholder:text-mute/70"
-              />
-            </label>
-            <label className="block text-xs text-mute">
-              Note
-              <input
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                placeholder="Stylist advance, travel, crew..."
-                className="mt-2 w-full rounded-xl border border-line bg-ink-800 px-4 py-3 text-sm text-ivory placeholder:text-mute/70"
-              />
-            </label>
-            <p className="rounded-xl border border-gold-400/15 bg-gold-400/5 p-3 text-xs leading-5 text-mute">
-              Your UPI app will ask you to review and authorize the transfer.
-              This workspace never collects your UPI PIN.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-6 space-y-4">
-            <div className="rounded-2xl border border-rose-400/20 bg-rose-400/[0.05] p-4">
-              <p className="text-xs uppercase tracking-wider text-mute">
-                Payment review
-              </p>
-              <p className="mt-2 font-display text-3xl text-rose-300">
-                {formatMoney(Number(amount))}
-              </p>
-              <p className="mt-1 text-sm text-ivory">
-                {recipient} · {upiId}
-              </p>
-              <p className="mt-1 text-xs text-mute">{note || "Personal payment"}</p>
-            </div>
-            <button
-              type="button"
-              onClick={payTest}
-              disabled={saving}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-rose-300 px-4 py-3 text-sm font-semibold text-ink-950 transition hover:brightness-110 disabled:opacity-60"
-            >
-              <CreditCard className="h-4 w-4" />
-              {saving ? "Processing..." : "Pay with Razorpay (test)"}
-            </button>
-            <p className="text-center text-[11px] leading-5 text-mute">
-              Test mode: no real money moves. Use test card 4386 2894 0766 0153
-              or UPI success@razorpay.
-            </p>
-            <div className="flex items-center gap-3 text-[11px] uppercase tracking-wider text-mute">
-              <span className="h-px flex-1 bg-line" />
-              or pay with a UPI app
-              <span className="h-px flex-1 bg-line" />
-            </div>
-            <a
-              href={paymentLink}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-line px-4 py-3 text-sm font-medium text-ivory transition hover:border-rose-300/50"
-            >
-              <Send className="h-4 w-4" />
-              Open UPI app to pay
-            </a>
-            <label className="block text-xs text-mute">
-              UPI transaction ID / UTR
-              <input
-                value={reference}
-                onChange={(event) => setReference(event.target.value)}
-                placeholder="Enter this after payment succeeds"
-                className="mt-2 w-full rounded-xl border border-line bg-ink-800 px-4 py-3 text-sm text-ivory placeholder:text-mute/70"
-              />
-            </label>
-            <p className="text-[11px] leading-5 text-mute">
-              If you paid in your UPI app, add the transaction ID here and
-              record it. Keep the ID for your records.
-            </p>
-          </div>
-        )}
-
-        {error && (
-          <p role="alert" className="mt-4 text-sm text-rose-400">
-            {error}
-          </p>
-        )}
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              if (ready) {
-                setReady(false);
-                setError("");
-              } else onClose();
-            }}
-            className="rounded-xl border border-line px-4 py-2.5 text-sm text-mute hover:text-ivory"
-          >
-            {ready ? "Edit details" : "Cancel"}
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-60"
-          >
-            {ready ? <Check className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
-            {ready ? "Record sent payment" : "Review payment"}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
 
 function SettlementForm({ payment, onClose, onSettle }) {
   const remaining = Math.max(0, payment.amount - payment.receivedAmount);
@@ -611,7 +366,6 @@ export default function PaymentsView({ initialPaymentId }) {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [settlingPayment, setSettlingPayment] = useState(null);
   const [billPayment, setBillPayment] = useState(null);
-  const [makePaymentOpen, setMakePaymentOpen] = useState(false);
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -691,18 +445,6 @@ export default function PaymentsView({ initialPaymentId }) {
     finishSettle(updated);
   };
 
-  const finishOutgoing = (saved) => {
-    setOutgoingPayments((current) => [saved, ...current]);
-    setMakePaymentOpen(false);
-    setTab("sent");
-    setNotice(`${formatMoney(saved.amount)} sent to ${saved.recipient}`);
-  };
-
-  const recordOutgoing = async (details) => {
-    const saved = await createSentPayment(details);
-    finishOutgoing(saved);
-  };
-
   const summary = [
     { label: "Received", value: received, tone: "text-aqua-400", icon: ArrowDownLeft },
     { label: "Sent", value: sentTotal, tone: "text-rose-300", icon: Send },
@@ -743,8 +485,7 @@ export default function PaymentsView({ initialPaymentId }) {
               Money in & out
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-mute">
-              Follow income from your projects and make payments to your team
-              from one private money desk.
+              Track project income, outstanding balances and your team payment history in one private money desk.
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-3">
@@ -758,14 +499,6 @@ export default function PaymentsView({ initialPaymentId }) {
                 Across {counts.received} settlements
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setMakePaymentOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-rose-300/30 bg-rose-300/10 px-4 py-3 text-sm font-semibold text-rose-200 transition hover:-translate-y-0.5 hover:border-rose-300/50 hover:bg-rose-300/15"
-            >
-              <Send className="h-4 w-4" />
-              Make a payment
-            </button>
           </div>
         </div>
         <div className="relative mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -982,14 +715,6 @@ export default function PaymentsView({ initialPaymentId }) {
       )}
 
       <AnimatePresence>
-        {makePaymentOpen && (
-          <MakePaymentForm
-            key="make-payment"
-            onClose={() => setMakePaymentOpen(false)}
-            onRecord={recordOutgoing}
-            onPaid={finishOutgoing}
-          />
-        )}
         {selectedPayment && (
           <PaymentDetails
             key="payment-details"

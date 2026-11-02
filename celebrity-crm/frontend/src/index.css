@@ -45,6 +45,15 @@ body {
   outline-offset: 2px;
 }
 
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 .gold-text {
   background: linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500));
   -webkit-background-clip: text;

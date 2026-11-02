@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Lock, LogOut, X } from "lucide-react";
+import { Lock, LogOut, Sparkles, X } from "lucide-react";
 import { navItems } from "../data/navigation";
 
 export default function Sidebar({
@@ -27,17 +27,18 @@ export default function Sidebar({
       </AnimatePresence>
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col justify-between border-r border-line bg-gradient-to-b from-ink-900 via-ink-900 to-ink-950 px-5 py-6 transition-transform duration-300 ease-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-72 flex-col overflow-hidden border-r border-white/[0.07] bg-[#100d16] px-4 py-4 shadow-[24px_0_70px_-38px_rgba(0,0,0,0.8)] transition-transform duration-300 ease-out lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div>
-          <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-2 pb-5">
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/[0.07] px-2 pb-5">
             <div className="min-w-0">
-              {/* <span className="block text-[10px] font-semibold uppercase tracking-[0.28em] text-gold-400">
-                Talent Workspace
-              </span> */}
-              <h2 className="mt-1 truncate font-display text-2xl font-light tracking-wider bg-gradient-to-r from-ivory via-gold-200 to-gold-400 bg-clip-text text-transparent">
+              <span className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.24em] text-gold-300/80">
+                <Sparkles className="h-3 w-3" />
+                Talent workspace
+              </span>
+              <h2 className="mt-2 truncate font-display text-xl font-light tracking-wide text-ivory">
                 {name}
               </h2>
             </div>
@@ -45,14 +46,17 @@ export default function Sidebar({
               type="button"
               aria-label="Close menu"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-mute transition hover:bg-white/5 hover:text-ivory lg:hidden"
+              className="rounded-xl border border-white/10 p-2 text-mute transition hover:border-gold-400/30 hover:bg-gold-400/10 hover:text-ivory lg:hidden"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <nav aria-label="Main" className="mt-6 space-y-1">
-            <p className="mb-3 px-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-mute/70">
+          <nav
+            aria-label="Main"
+            className="scrollbar-none mt-5 min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain pb-4"
+          >
+            <p className="mb-3 px-3 text-[9px] font-semibold uppercase tracking-[0.22em] text-mute/60">
               Studio menu
             </p>
             {navItems.map((item) => {
@@ -64,29 +68,31 @@ export default function Sidebar({
                   type="button"
                   onClick={() => onSelect(item.id)}
                   aria-current={isActive ? "page" : undefined}
-                  className={`group relative flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                  className={`group relative flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-[13px] font-medium transition duration-200 ${
                     isActive
-                      ? "text-gold-300"
-                      : "text-mute hover:bg-white/[0.04] hover:text-ivory"
+                      ? "text-gold-200"
+                      : "text-mute hover:bg-white/[0.045] hover:text-ivory"
                   }`}
                 >
                   {isActive && (
                     <motion.span
                       layoutId="nav-pill"
-                      transition={{
-                        type: "spring",
-                        stiffness: 420,
-                        damping: 34,
-                      }}
-                      className="absolute inset-0 rounded-xl border border-gold-400/30 bg-gold-400/15"
+                      transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                      className="absolute inset-0 rounded-xl border border-gold-400/25 bg-gradient-to-r from-gold-400/[0.14] to-gold-400/[0.04]"
                     />
                   )}
-                  <span className="relative flex items-center gap-3">
-                    <Icon className="h-[18px] w-[18px] transition-transform duration-200 group-hover:scale-110" />
-                    {item.label}
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-indicator"
+                      className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-gold-300"
+                    />
+                  )}
+                  <span className="relative flex min-w-0 items-center gap-3">
+                    <Icon className={`h-[17px] w-[17px] shrink-0 transition ${isActive ? "text-gold-300" : "group-hover:text-gold-300"}`} />
+                    <span className="truncate">{item.label}</span>
                   </span>
                   {item.badge && (
-                    <span className="relative grid h-5 min-w-5 place-items-center rounded-full bg-gold-400 px-1.5 text-[11px] font-bold text-ink-950">
+                    <span className="relative grid h-5 min-w-5 place-items-center rounded-full border border-gold-400/20 bg-gold-400/10 px-1.5 text-[10px] font-semibold text-gold-300">
                       {item.badge}
                     </span>
                   )}
@@ -96,17 +102,19 @@ export default function Sidebar({
           </nav>
         </div>
 
-        <div className="space-y-3 border-t border-line pt-4">
-          <p className="flex items-center gap-2 px-3 text-xs text-mute">
+        <div className="mt-3 shrink-0 border-t border-white/[0.08] pt-3">
+          <p className="mb-3 flex items-center gap-2 px-2 text-[11px] text-mute">
             <Lock className="h-3.5 w-3.5 text-gold-400" />
             Private session
           </p>
           <button
             type="button"
             onClick={onSignOut}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-line py-2.5 text-sm text-mute transition duration-200 hover:border-rose-400/40 hover:bg-rose-400/10 hover:text-rose-400"
+            className="flex w-full items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.025] px-3.5 py-3 text-left text-[13px] font-medium text-mute transition duration-200 hover:border-rose-400/25 hover:bg-rose-400/[0.08] hover:text-rose-300"
           >
-            <LogOut className="h-4 w-4" />
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/[0.04]">
+              <LogOut className="h-4 w-4" />
+            </span>
             Sign out
           </button>
         </div>

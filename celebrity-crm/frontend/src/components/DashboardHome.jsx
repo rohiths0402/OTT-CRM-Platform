@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { FileSignature, Phone } from "lucide-react";
+import {
+  CalendarDays,
+  Clapperboard,
+  FileSignature,
+  Megaphone,
+  Phone,
+} from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import TodayHero from "./home/TodayHero";
-import AttentionCard from "./home/AttentionCard";
 import MiniCalendar from "./home/MiniCalendar";
 import PaymentsCard from "./home/PaymentsCard";
 import ProjectsCard from "./home/ProjectsCard";
@@ -21,8 +26,6 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
 };
 
-const urgencyOrder = { overdue: 0, today: 1, week: 2 };
-
 const getGreeting = () => {
   const hour = new Date().getHours();
   if (hour < 12) return "Good morning";
@@ -36,59 +39,6 @@ const todayLabel = () =>
     day: "numeric",
     month: "long",
   });
-
-function buildAttention(events, dashboard, today) {
-  const items = [];
-
-  events
-    .filter((event) => event.status === "updated" && event.date >= today)
-    .forEach((event) => {
-      items.push({
-        id: `event-${event.id}`,
-        kind: "schedule",
-        title: "Call time changed",
-        detail: `${event.project}, now ${event.callTime}`,
-        urgency: isSameDay(event.date, today) ? "today" : "week",
-        action: "Confirm",
-        target: "schedule",
-        payload: { date: event.date },
-      });
-    });
-
-  events
-    .filter((event) => event.response === "pending" && event.date >= today)
-    .forEach((event) => {
-      items.push({
-        id: `offer-${event.id}`,
-        kind: "schedule",
-        title: "New offer to answer",
-        detail: event.offer?.company
-          ? `${event.project}, ${event.offer.company}`
-          : event.project,
-        urgency: "week",
-        action: "Respond",
-        target: "schedule",
-        payload: { date: event.date },
-      });
-    });
-
-  dashboard.attention.forEach((entry) => {
-    const isContract = entry.target === "contracts";
-    const recordId = Number(entry.id.slice(1));
-    items.push({
-      id: entry.id,
-      kind: isContract ? "contract" : "approve",
-      title: entry.title,
-      detail: entry.detail,
-      urgency: entry.tag === "Today" ? "today" : "week",
-      action: isContract ? "Sign now" : "Review",
-      target: entry.target,
-      payload: isContract ? { contractId: recordId } : { dealId: recordId },
-    });
-  });
-
-  return items.sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]);
-}
 
 function QuickAction({ icon: Icon, label, hint, href, onClick }) {
   const Tag = href ? "a" : "button";
@@ -113,6 +63,98 @@ function QuickAction({ icon: Icon, label, hint, href, onClick }) {
         <span className="block text-xs text-mute">{hint}</span>
       </span>
     </Tag>
+  );
+}
+
+function CareerSnapshot({ events, projects, dashboard, today, onNavigate }) {
+  const upcomingBookings = events.filter(
+    (event) => event.response === "accepted" && event.date >= today,
+  );
+  const activeProjects = projects.filter(
+    (project) => project.status === "active",
+  );
+  const activeDeals = dashboard.attention.filter(
+    (entry) => entry.target === "deals",
+  );
+  const insights = [
+    {
+      label: "Bookings ahead",
+      count: upcomingBookings.length,
+      detail: upcomingBookings[0]
+        ? `${upcomingBookings[0].project} · ${upcomingBookings[0].date.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
+        : "No confirmed bookings yet",
+      icon: CalendarDays,
+      target: "schedule",
+      tone: "text-aqua-400 bg-aqua-400/10",
+    },
+    {
+      label: "Active productions",
+      count: activeProjects.length,
+      detail: activeProjects[0]?.title || "Your current project slate",
+      icon: Clapperboard,
+      target: "projects",
+      tone: "text-gold-300 bg-gold-400/10",
+    },
+    {
+      label: "Brand opportunities",
+      count: activeDeals.length,
+      detail: activeDeals[0]?.detail || "No open brand conversations",
+      icon: Megaphone,
+      target: "deals",
+      tone: "text-rose-300 bg-rose-400/10",
+    },
+  ];
+
+  return (
+    <section className="overflow-hidden rounded-3xl border border-line bg-ink-900 p-5 sm:p-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-300">
+            Your career at a glance
+          </p>
+          <h3 className="mt-1 font-display text-2xl text-ivory">
+            Career snapshot
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={() => onNavigate("analytics")}
+          className="text-xs font-semibold text-gold-300 transition hover:text-gold-200"
+        >
+          View performance
+        </button>
+      </div>
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        {insights.map((insight) => {
+          const Icon = insight.icon;
+          return (
+            <button
+              key={insight.label}
+              type="button"
+              onClick={() => onNavigate(insight.target)}
+              className="group flex min-w-0 items-center gap-3 rounded-2xl border border-line bg-ink-800/60 p-4 text-left transition hover:-translate-y-0.5 hover:border-gold-400/35 hover:bg-ink-800"
+            >
+              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${insight.tone}`}>
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center justify-between gap-2">
+                  <span className="truncate text-xs font-medium text-mute">
+                    {insight.label}
+                  </span>
+                  <span className="font-display text-xl text-ivory">
+                    {insight.count}
+                  </span>
+                </span>
+                <span className="mt-1 block truncate text-[11px] text-mute/80">
+                  {insight.detail}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -155,9 +197,8 @@ export default function DashboardHome({ name, onNavigate }) {
       event.response === "pending" ? { ...event, status: "tentative" } : event,
     );
 
-  const attention = buildAttention(events, dashboard, today);
-  const contractsWaiting = attention.filter(
-    (entry) => entry.kind === "contract",
+  const contractsWaiting = dashboard.attention.filter(
+    (entry) => entry.target === "contracts",
   ).length;
   const manager = dashboard.manager;
 
@@ -220,7 +261,13 @@ export default function DashboardHome({ name, onNavigate }) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <motion.div variants={item}>
-          <AttentionCard items={attention} onNavigate={onNavigate} />
+          <CareerSnapshot
+            events={events}
+            projects={projects}
+            dashboard={dashboard}
+            today={today}
+            onNavigate={onNavigate}
+          />
         </motion.div>
         <motion.div variants={item}>
           <MiniCalendar

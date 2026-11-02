@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bell, Check, Menu, MoveUpRight } from "lucide-react";
+import { Bell, Check, Menu, MoveUpRight, Sparkles } from "lucide-react";
 import Avatar from "./Avatar";
 import {
   getNotifications,
@@ -67,28 +67,30 @@ export default function Topbar({
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-white/[0.06] bg-gradient-to-r from-ink-950/95 via-ink-950/90 to-ink-900/80 px-5 backdrop-blur-xl sm:px-8">
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-30 flex min-h-[76px] items-center justify-between gap-3 border-b border-white/[0.07] bg-ink-950/85 px-4 backdrop-blur-2xl sm:px-7 lg:px-9">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
         <button
           type="button"
           aria-label="Open menu"
           onClick={onOpenMenu}
-          className="rounded-lg p-2 text-ivory transition hover:bg-white/5 lg:hidden"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/[0.08] bg-white/[0.025] text-ivory transition hover:border-gold-400/25 hover:bg-gold-400/10 lg:hidden"
         >
           <Menu className="h-5 w-5" />
         </button>
-        {/* <span className="hidden h-9 w-px bg-gradient-to-b from-transparent via-gold-400/50 to-transparent lg:block" /> */}
-        {/* <div>
-          <p className="text-[9px] uppercase tracking-[0.24em] text-gold-300/80">
-            Private talent suite
-          </p>
-          <h1 className="font-display text-xl leading-tight text-ivory sm:text-2xl">
+        {/* <span className="hidden h-10 w-10 shrink-0 place-items-center rounded-xl border border-gold-400/20 bg-gold-400/[0.08] text-gold-300 sm:grid">
+          <Sparkles className="h-[18px] w-[18px]" />
+        </span> */}
+        <div className="min-w-0">
+          {/* <p className="hidden text-[9px] font-semibold uppercase tracking-[0.22em] text-mute/70 sm:block">
+            Talent workspace
+          </p> */}
+          <h1 className="truncate font-display text-lg font-light leading-tight text-ivory sm:mt-1 sm:text-xl">
             {title}
           </h1>
-        </div> */}
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <div
           className="relative"
           ref={wrapperRef}
@@ -124,7 +126,7 @@ export default function Topbar({
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.97 }}
                 transition={{ duration: 0.18 }}
-                className="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-2.5rem)] rounded-2xl border border-line bg-ink-900 p-4 shadow-2xl"
+                className="absolute right-0 top-12 z-50 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-ink-900 p-4 shadow-2xl"
               >
                 <div className="flex items-center justify-between border-b border-line pb-3">
                   <span className="text-sm font-semibold text-ivory">
@@ -186,7 +188,7 @@ export default function Topbar({
           type="button"
           onClick={onOpenProfile}
           aria-label={`Open ${name}'s profile`}
-          className="group flex min-w-0 items-center gap-3 rounded-2xl p-1.5 text-left transition hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400"
+          className="group flex min-w-0 items-center gap-2 rounded-2xl border border-transparent py-1.5 pl-2 pr-1.5 text-left transition hover:border-white/[0.07] hover:bg-white/[0.035] focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 sm:gap-3 sm:pl-3"
         >
           <span className="rounded-full bg-gradient-to-br from-gold-300/70 to-aqua-400/70 p-[2px]">
             <Avatar
@@ -195,14 +197,14 @@ export default function Topbar({
               className="h-10 w-10 border-2 border-ink-900 sm:h-11 sm:w-11"
             />
           </span>
-          {/* <span className="hidden min-w-0 sm:block">
-            <span className="block truncate font-display text-sm text-ivory transition group-hover:text-gold-300">
+          <span className="hidden min-w-0 sm:block">
+            <span className="block max-w-36 truncate text-xs font-semibold text-ivory transition group-hover:text-gold-300">
               {name}
-            </span> */}
-            {/* <span className="mt-0.5 block text-[10px] uppercase tracking-[0.16em] text-mute">
-              Talent workspace
-            </span> */}
-          {/* </span> */}
+            </span>
+            <span className="mt-0.5 block text-[9px] uppercase tracking-[0.16em] text-mute">
+              View profile
+            </span>
+          </span>
         </button>
       </div>
     </header>

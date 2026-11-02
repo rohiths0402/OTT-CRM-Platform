@@ -8,6 +8,8 @@ import ScheduleView from "../components/schedule/ScheduleView";
 import ProjectsView from "../components/projects/ProjectsView";
 import PaymentsView from "../components/payments/PaymentsView";
 import BrandDealsView from "../components/BrandDealsView";
+import TalentManagersView from "../components/TalentManagersView";
+import PerformanceAnalyticsView from "../components/PerformanceAnalyticsView";
 import ContractsView from "../components/ContractsView";
 import ProfileView from "../components/ProfileView";
 import SecurityView from "../components/SecurityView";
@@ -70,6 +72,8 @@ export default function Dashboard() {
           initialDealId={context?.dealId}
         />
       );
+    if (activeTab === "managers") return <TalentManagersView />;
+    if (activeTab === "analytics") return <PerformanceAnalyticsView />;
     if (activeTab === "contracts")
       return <ContractsView initialContractId={context?.contractId} />;
     if (activeTab === "security")
