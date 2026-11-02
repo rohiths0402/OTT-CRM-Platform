@@ -1,0 +1,235 @@
+.production-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  background: #171717;
+  border: 1px solid #303030;
+  border-radius: 11px;
+  scrollbar-width: thin;
+  scrollbar-color: #444 #171717;
+}
+
+.production-table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.production-table-wrapper::-webkit-scrollbar-track {
+  background: #171717;
+}
+
+.production-table-wrapper::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 10px;
+}
+
+.production-table {
+  width: 100%;
+  min-width: 950px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+
+.production-table th {
+  padding: 15px 15px;
+  color: #a5a5ad;
+  background: #202020;
+  border-bottom: 1px solid #383838;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.65px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.production-table td {
+  padding: 14px 15px;
+  color: #ceced3;
+  border-bottom: 1px solid #292929;
+  font-size: 12px;
+  white-space: nowrap;
+  vertical-align: middle;
+  transition: background 0.18s ease;
+}
+
+.production-table tbody tr {
+  transition: background 0.18s ease;
+}
+
+.production-table tbody tr:hover {
+  background: rgba(214, 178, 62, 0.045);
+}
+
+.production-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Company cell */
+
+.company-cell {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 195px;
+}
+
+.company-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  color: #dfbf50;
+  background: rgba(214, 178, 62, 0.1);
+  border: 1px solid rgba(214, 178, 62, 0.17);
+  border-radius: 10px;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.production-table tbody tr:hover .company-icon {
+  background: rgba(214, 178, 62, 0.17);
+  transform: scale(1.04);
+}
+
+.company-cell strong,
+.company-cell span {
+  display: block;
+}
+
+.company-cell strong {
+  max-width: 210px;
+  overflow: hidden;
+  color: #f4f4f5;
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+
+.company-cell span {
+  max-width: 210px;
+  overflow: hidden;
+  color: #888891;
+  font-size: 10px;
+  text-overflow: ellipsis;
+}
+
+/* Status */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.status-badge::before {
+  width: 6px;
+  height: 6px;
+  content: "";
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-badge.active {
+  color: #82d6a0;
+  background: rgba(38, 126, 70, 0.17);
+  border: 1px solid rgba(91, 184, 122, 0.15);
+}
+
+.status-badge.inactive {
+  color: #b3b3bc;
+  background: #292929;
+  border: 1px solid #3a3a3a;
+}
+
+/* Actions */
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.table-actions button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: #b9b9c0;
+  background: #252525;
+  border: 1px solid #393939;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.table-actions button:hover {
+  color: #e5c354;
+  background: #292410;
+  border-color: #b99a37;
+  transform: translateY(-2px);
+}
+
+.table-actions button:active {
+  transform: translateY(0) scale(0.94);
+}
+
+.table-actions button.delete-action:hover {
+  color: #ff8585;
+  background: rgba(150, 40, 40, 0.17);
+  border-color: #a84646;
+}
+
+/* Empty state */
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 245px;
+  padding: 40px 20px;
+  text-align: center;
+  color: #a1a1aa;
+  background: #171717;
+  border: 1px dashed #414141;
+  border-radius: 12px;
+}
+
+.empty-state svg {
+  color: #d6b23e;
+  opacity: 0.9;
+}
+
+.empty-state h3 {
+  margin: 14px 0 7px;
+  color: #f5f5f5;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.empty-state p {
+  max-width: 320px;
+  margin: 0;
+  color: #92929b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Keyboard accessibility */
+
+.table-actions button:focus-visible {
+  outline: 2px solid #d6b23e;
+  outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+  .production-table {
+    min-width: 900px;
+  }
+}

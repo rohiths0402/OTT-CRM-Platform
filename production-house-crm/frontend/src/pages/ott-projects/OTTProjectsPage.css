@@ -1,0 +1,179 @@
+
+.ott-projects-page {
+  color: #f5f5f5;
+  width: 100%;
+}
+
+.ott-page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.ott-eyebrow {
+  color: #d6b23e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+}
+
+.ott-page-heading h1 {
+  margin: 7px 0;
+  font-size: 25px;
+}
+
+.ott-page-heading p,
+.ott-list-heading p {
+  margin: 0;
+  color: #a1a1aa;
+  font-size: 13px;
+}
+
+.ott-add-btn,
+.ott-save-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 17px;
+  color: #111;
+  background: #d6b23e;
+  border: 1px solid #d6b23e;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.ott-add-btn:hover,
+.ott-save-btn:hover {
+  background: #e8ca68;
+}
+
+.ott-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.ott-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 95px;
+  padding: 18px;
+  background: #171717;
+  border: 1px solid #303030;
+  border-radius: 11px;
+}
+
+.ott-stat-icon {
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #d6b23e;
+  background: #29230f;
+  border: 1px solid #4b3d16;
+  border-radius: 9px;
+}
+
+.ott-stat-card span {
+  color: #a1a1aa;
+  font-size: 12px;
+}
+
+.ott-stat-card h2 {
+  margin: 6px 0 0;
+  font-size: 23px;
+}
+
+.ott-list-section {
+  padding: 20px;
+  background: #111;
+  border: 1px solid #303030;
+  border-radius: 12px;
+}
+
+.ott-list-heading {
+  margin-bottom: 18px;
+}
+
+.ott-list-heading h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.ott-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-top: 18px;
+  color: #a1a1aa;
+  font-size: 12px;
+}
+
+.ott-pagination-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ott-pagination-buttons button {
+  min-width: 34px;
+  height: 33px;
+  padding: 0 10px;
+  color: #c4c4c8;
+  background: #1c1c1c;
+  border: 1px solid #383838;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ott-pagination-buttons button:hover:not(:disabled),
+.ott-pagination-buttons button.current-page {
+  color: #111;
+  background: #d6b23e;
+  border-color: #d6b23e;
+}
+
+.ott-pagination-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1100px) {
+  .ott-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .ott-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ott-add-btn {
+    width: 100%;
+  }
+
+  .ott-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ott-list-section {
+    padding: 13px;
+  }
+
+  .ott-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
