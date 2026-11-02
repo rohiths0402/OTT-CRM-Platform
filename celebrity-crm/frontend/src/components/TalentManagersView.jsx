@@ -13,17 +13,15 @@ import {
   X,
 } from "lucide-react";
 import { getDashboard } from "../api/dashboardApi";
-
-const TEAM_KEY = "celebrity-crm-team-members";
-const TASK_KEY = "celebrity-crm-manager-tasks";
-
-const readList = (key) => {
-  const value = localStorage.getItem(key);
-  if (!value) return [];
-  const parsed = JSON.parse(value);
-  if (!Array.isArray(parsed)) throw new Error(`Saved ${key} data is invalid.`);
-  return parsed;
-};
+import {
+  addTask,
+  addTeamMember,
+  getTasks,
+  getTeam,
+  removeTask,
+  removeTeamMember,
+  toggleTask,
+} from "../api/managerApi";
 
 function ManagerForm({ onClose, onSave }) {
   const [form, setForm] = useState({
@@ -34,22 +32,27 @@ function ManagerForm({ onClose, onSave }) {
     focus: "",
   });
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     if (!form.name.trim() || !form.role.trim()) {
       setError("Enter a name and role to add a team member.");
       return;
     }
-    onSave({
-      ...form,
-      id: crypto.randomUUID(),
-      name: form.name.trim(),
-      role: form.role.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      focus: form.focus.trim(),
-    });
+    setSaving(true);
+    try {
+      await onSave({
+        name: form.name.trim(),
+        role: form.role.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        focus: form.focus.trim(),
+      });
+    } catch {
+      setError("Could not save this contact. Try again.");
+      setSaving(false);
+    }
   };
 
   return (
@@ -108,10 +111,11 @@ function ManagerForm({ onClose, onSave }) {
           </button>
           <button
             type="submit"
+            disabled={saving}
             className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
           >
             <Plus className="h-4 w-4" />
-            Add contact
+            {saving ? "Saving..." : "Add contact"}
           </button>
         </div>
       </form>
@@ -124,20 +128,21 @@ function TaskForm({ members, onClose, onSave }) {
   const [dueDate, setDueDate] = useState("");
   const [assignee, setAssignee] = useState("");
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     if (!title.trim()) {
       setError("Add a task title before saving.");
       return;
     }
-    onSave({
-      id: crypto.randomUUID(),
-      title: title.trim(),
-      dueDate,
-      assignee,
-      done: false,
-    });
+    setSaving(true);
+    try {
+      await onSave({ title: title.trim(), dueDate, assignee });
+    } catch {
+      setError("Could not save this task. Try again.");
+      setSaving(false);
+    }
   };
 
   return (
@@ -202,10 +207,11 @@ function TaskForm({ members, onClose, onSave }) {
           </button>
           <button
             type="submit"
+            disabled={saving}
             className="gold-btn inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
           >
             <Plus className="h-4 w-4" />
-            Save task
+            {saving ? "Saving..." : "Save task"}
           </button>
         </div>
       </form>
@@ -283,14 +289,8 @@ export default function TalentManagersView() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([
-      getDashboard(),
-      Promise.resolve().then(() => ({
-        members: readList(TEAM_KEY),
-        tasks: readList(TASK_KEY),
-      })),
-    ])
-      .then(([dashboard, saved]) => {
+    Promise.all([getDashboard(), getTeam(), getTasks()])
+      .then(([dashboard, team, taskList]) => {
         if (!active) return;
         setPrimaryManager(
           dashboard.manager?.name
@@ -303,8 +303,8 @@ export default function TalentManagersView() {
               }
             : null,
         );
-        setMembers(saved.members);
-        setTasks(saved.tasks);
+        setMembers(team);
+        setTasks(taskList);
       })
       .catch(() => {
         if (active) setError("Could not load your manager workspace. Please try again.");
@@ -327,25 +327,44 @@ export default function TalentManagersView() {
       .includes(query.trim().toLowerCase()),
   );
 
-  const saveMembers = (next) => {
+  const saveMember = async (member) => {
+    const saved = await addTeamMember(member);
+    setMembers((current) => [saved, ...current]);
+    setError("");
+    setModal("");
+  };
+
+  const deleteMember = async (id) => {
     try {
-      localStorage.setItem(TEAM_KEY, JSON.stringify(next));
-      setMembers(next);
-      setError("");
-      setModal("");
+      await removeTeamMember(id);
+      setMembers((current) => current.filter((entry) => entry.id !== id));
     } catch {
-      setError("Could not save this contact in this browser.");
+      setError("Could not remove this contact. Try again.");
     }
   };
 
-  const saveTasks = (next) => {
+  const saveTask = async (task) => {
+    const saved = await addTask(task);
+    setTasks((current) => [saved, ...current]);
+    setError("");
+    setModal("");
+  };
+
+  const flipTask = async (id) => {
     try {
-      localStorage.setItem(TASK_KEY, JSON.stringify(next));
-      setTasks(next);
-      setError("");
-      setModal("");
+      const updated = await toggleTask(id);
+      setTasks((current) => current.map((item) => (item.id === id ? updated : item)));
     } catch {
-      setError("Could not save this task in this browser.");
+      setError("Could not update this task. Try again.");
+    }
+  };
+
+  const deleteTask = async (id) => {
+    try {
+      await removeTask(id);
+      setTasks((current) => current.filter((item) => item.id !== id));
+    } catch {
+      setError("Could not delete this task. Try again.");
     }
   };
 
@@ -367,7 +386,7 @@ export default function TalentManagersView() {
               Keep your manager, representatives and follow-ups in one place.
             </p>
             <p className="mt-2 text-xs text-mute/80">
-              Your primary manager comes from your profile. Added contacts and tasks are saved in this browser.
+              Your primary manager comes from your profile. Added contacts and tasks are saved to your account.
             </p>
           </div>
           <button
@@ -406,7 +425,7 @@ export default function TalentManagersView() {
                 key={member.id}
                 member={member}
                 primary={member.id === "primary-manager"}
-                onRemove={() => saveMembers(members.filter((entry) => entry.id !== member.id))}
+                onRemove={() => deleteMember(member.id)}
               />
             ))}
           </div>
@@ -446,7 +465,7 @@ export default function TalentManagersView() {
                   <button
                     type="button"
                     aria-label={task.done ? `Mark ${task.title} incomplete` : `Complete ${task.title}`}
-                    onClick={() => saveTasks(tasks.map((item) => item.id === task.id ? { ...item, done: !item.done } : item))}
+                    onClick={() => flipTask(task.id)}
                     className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border ${task.done ? "border-aqua-400 bg-aqua-400/15 text-aqua-400" : "border-line text-transparent hover:border-gold-400"}`}
                   >
                     <Check className="h-3.5 w-3.5" />
@@ -460,7 +479,7 @@ export default function TalentManagersView() {
                   <button
                     type="button"
                     aria-label={`Delete ${task.title}`}
-                    onClick={() => saveTasks(tasks.filter((item) => item.id !== task.id))}
+                    onClick={() => deleteTask(task.id)}
                     className="rounded-lg p-2 text-mute hover:text-rose-400"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -478,12 +497,12 @@ export default function TalentManagersView() {
       <AnimatePresence>
         {modal === "member" && (
           <motion.div key="member-form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <ManagerForm onClose={() => setModal("")} onSave={(member) => saveMembers([member, ...members])} />
+            <ManagerForm onClose={() => setModal("")} onSave={saveMember} />
           </motion.div>
         )}
         {modal === "task" && (
           <motion.div key="task-form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <TaskForm members={allMembers} onClose={() => setModal("")} onSave={(task) => saveTasks([task, ...tasks])} />
+            <TaskForm members={allMembers} onClose={() => setModal("")} onSave={saveTask} />
           </motion.div>
         )}
       </AnimatePresence>

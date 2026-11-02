@@ -3,6 +3,7 @@ package com.example.celebrity_crm.contract.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contracts")
@@ -30,7 +31,7 @@ public class Contract {
     private String actionNote;
 
     private String signedBy;
-    private LocalDate signedAt;
+    private LocalDateTime signedAt;
 
     @Column(columnDefinition = "LONGTEXT")
     private String signatureData;
@@ -58,8 +59,8 @@ public class Contract {
     public void setActionNote(String actionNote) { this.actionNote = actionNote; }
     public String getSignedBy() { return signedBy; }
     public void setSignedBy(String signedBy) { this.signedBy = signedBy; }
-    public LocalDate getSignedAt() { return signedAt; }
-    public void setSignedAt(LocalDate signedAt) { this.signedAt = signedAt; }
+    public LocalDateTime getSignedAt() { return signedAt; }
+    public void setSignedAt(LocalDateTime signedAt) { this.signedAt = signedAt; }
     public String getSignatureData() { return signatureData; }
     public void setSignatureData(String signatureData) { this.signatureData = signatureData; }
 }

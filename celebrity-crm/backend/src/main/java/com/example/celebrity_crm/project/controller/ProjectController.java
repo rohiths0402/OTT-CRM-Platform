@@ -44,4 +44,8 @@ public class ProjectController {
     public void delete(Authentication authentication, @PathVariable Long id) {
         service.delete(currentUser.id(authentication), id);
     }
+    @GetMapping("/{id}")
+    public ProjectResponse get(Authentication authentication, @PathVariable Long id) {
+        return service.get(currentUser.id(authentication), id);
+    }
 }

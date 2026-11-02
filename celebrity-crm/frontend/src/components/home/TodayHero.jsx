@@ -35,7 +35,7 @@ function buildSteps(event) {
   const makeup = timeFrom(event.look?.makeup);
   if (makeup) steps.push({ label: "Makeup", time: makeup });
   steps.push({
-    label: event.type === "shoot" ? "Call" : "Start",
+       label: event.type === "shoot" ? "Shooting" : "Start",
     time: event.callTime,
     isCall: true,
   });
@@ -60,7 +60,7 @@ function buildSteps(event) {
 
 function getCountdown(event, steps, now, date, today) {
   const isToday = date.getTime() === today.getTime();
-  const callLabel = event.type === "shoot" ? "Call time in" : "Starts in";
+    const callLabel = event.type === "shoot" ? "Shooting starts in" : "Starts in";
 
   if (!isToday) {
     const days = Math.round((date - today) / 86400000);

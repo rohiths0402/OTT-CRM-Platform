@@ -155,4 +155,7 @@ public class ProjectService {
         }
         return days == 1 ? "Tomorrow" : "In " + days + " days";
     }
+    public ProjectResponse get(Long userId, Long id) {
+        return one(find(userId, id));
+    }
 }

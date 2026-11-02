@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +20,7 @@ import java.util.Locale;
 public class ContractService {
 
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
+    private static final DateTimeFormatter SIGNED = DateTimeFormatter.ofPattern("dd MMM yyyy, h:mm a", Locale.ENGLISH);
 
     private final ContractRepository repository;
     private final NotificationService notifications;
@@ -59,7 +61,7 @@ public class ContractService {
         contract.setStatus("Signed");
         contract.setSignedBy(request.signer().trim());
         contract.setSignatureData(request.signatureData());
-        contract.setSignedAt(LocalDate.now());
+        contract.setSignedAt(LocalDateTime.now());
         contract.setUpdatedOn(LocalDate.now());
         contract.setActionNote("A signed copy is ready in your project records.");
         Contract saved = repository.save(contract);
@@ -98,7 +100,7 @@ public class ContractService {
         return new ContractResponse(c.getId(), c.getTitle(), c.getParty(), c.getType(), c.getStatus(),
                 c.getAmount(), updatedText(c), c.getDueDate() == null ? "Not set" : c.getDueDate().format(DATE),
                 c.getTerms(), c.getActionNote(), c.getSignedBy(),
-                c.getSignedAt() == null ? null : c.getSignedAt().format(DATE), c.getSignatureData());
+                c.getSignedAt() == null ? null : c.getSignedAt().format(SIGNED), c.getSignatureData());
     }
 
     private String updatedText(Contract c) {

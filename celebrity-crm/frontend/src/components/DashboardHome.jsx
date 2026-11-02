@@ -106,7 +106,7 @@ function CareerSnapshot({ events, projects, dashboard, today, onNavigate }) {
   ];
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-line bg-ink-900 p-5 sm:p-6">
+    <section className="flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-ink-900 p-5 sm:p-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-300">
@@ -124,7 +124,7 @@ function CareerSnapshot({ events, projects, dashboard, today, onNavigate }) {
           View performance
         </button>
       </div>
-      <div className="mt-5 grid gap-3 md:grid-cols-3">
+      <div className="mt-5 grid flex-1 gap-3">
         {insights.map((insight) => {
           const Icon = insight.icon;
           return (
@@ -132,23 +132,21 @@ function CareerSnapshot({ events, projects, dashboard, today, onNavigate }) {
               key={insight.label}
               type="button"
               onClick={() => onNavigate(insight.target)}
-              className="group flex min-w-0 items-center gap-3 rounded-2xl border border-line bg-ink-800/60 p-4 text-left transition hover:-translate-y-0.5 hover:border-gold-400/35 hover:bg-ink-800"
+              className="group flex min-w-0 items-center gap-4 rounded-2xl border border-line bg-ink-800/60 p-4 text-left transition hover:-translate-y-0.5 hover:border-gold-400/35 hover:bg-ink-800"
             >
-              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${insight.tone}`}>
+              <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${insight.tone}`}>
                 <Icon className="h-5 w-5" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="flex items-center justify-between gap-2">
-                  <span className="truncate text-xs font-medium text-mute">
-                    {insight.label}
-                  </span>
-                  <span className="font-display text-xl text-ivory">
-                    {insight.count}
-                  </span>
+                <span className="block text-sm font-medium text-ivory">
+                  {insight.label}
                 </span>
-                <span className="mt-1 block truncate text-[11px] text-mute/80">
+                <span className="mt-1 block truncate text-xs text-mute">
                   {insight.detail}
                 </span>
+              </span>
+              <span className="font-display text-3xl text-ivory">
+                {insight.count}
               </span>
             </button>
           );
@@ -260,7 +258,7 @@ export default function DashboardHome({ name, onNavigate }) {
       </motion.section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <motion.div variants={item}>
+        <motion.div variants={item} className="h-full">
           <CareerSnapshot
             events={events}
             projects={projects}
