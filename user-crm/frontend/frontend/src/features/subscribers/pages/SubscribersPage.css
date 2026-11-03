@@ -1,4 +1,0 @@
-/* Page-specific styles for SubscribersPage. The module stylesheet supplies shared layout primitives. */
-@import '../subscribers.css';
-
-.subscribers-page { min-width: 0; }

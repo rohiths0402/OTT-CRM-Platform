@@ -9,26 +9,19 @@ from .models import AuditLog
 User = get_user_model()
 
 
+
 class LoginSerializer(serializers.Serializer):
-
     email = serializers.EmailField()
-
     password = serializers.CharField(
         write_only=True,
         trim_whitespace=False
     )
-
-    role = serializers.ChoiceField(
-        choices=Role.ROLE_CHOICES
-    )
-
     remember_me = serializers.BooleanField(
         required=False,
         default=False
     )
 
     def validate(self, attrs):
-
         user = authenticate(
             request=self.context.get("request"),
             username=attrs["email"].lower(),
@@ -40,14 +33,38 @@ class LoginSerializer(serializers.Serializer):
                 "Invalid email or password."
             )
 
-        if not user.has_role(attrs["role"]):
+        # Fetch the employee's assigned active roles from MySQL.
+        active_roles = list(
+            user.roles.filter(is_active=True).values_list(
+                "code", flat=True
+            )
+        )
+
+        role_priority = [
+            "super_admin",
+            "admin",
+            "analyst",
+            "support",
+        ]
+
+        selected_role = next(
+            (
+                role for role in role_priority
+                if role in active_roles
+            ),
+            None
+        )
+
+        if not selected_role:
             raise serializers.ValidationError(
-                "You don't have permission to access this role."
+                "No active role is assigned to this account."
             )
 
         attrs["user"] = user
+        attrs["role"] = selected_role
 
         return attrs
+
 
 
 class UserSerializer(serializers.ModelSerializer):

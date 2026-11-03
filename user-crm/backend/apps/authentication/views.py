@@ -84,6 +84,7 @@ class LoginView(APIView):
         return Response({
             "access": str(access),
             "refresh": str(refresh),
+            "role": serializer.validated_data["role"],
             "user": UserSerializer(user).data
         })
 

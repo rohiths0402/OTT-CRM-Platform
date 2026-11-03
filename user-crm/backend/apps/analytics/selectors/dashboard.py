@@ -17,6 +17,38 @@ def overview(days=30):
     return {"new_subscribers":subscribers,"monthly_active_viewers":active,"watch_hours":round(watch_seconds/3600,2),"ad_impressions":ad_impressions}
 def top_titles(days=30,limit=10):
     since=timezone.now()-timedelta(days=days)
-    # Database performs aggregation and ordering; no full event table is loaded into Python.
     rows=ViewingSession.objects.filter(started_at__gte=since).values("title_id","title__name").annotate(watch_seconds=Sum("watched_seconds")).order_by("-watch_seconds")[:limit]
     return [{"title_id":r["title_id"],"title":r["title__name"],"watch_hours":round((r["watch_seconds"] or 0)/3600,2)} for r in rows]
+def top_titles(days=30, limit=None):
+    since = timezone.now() - timedelta(days=days)
+
+    sessions = ViewingSession.objects.filter(
+        started_at__gte=since
+    )
+
+    queryset = (
+        sessions
+        .values(
+            "title_id",
+            "title__name",
+        )
+        .annotate(
+            watch_seconds=Sum("watched_seconds")
+        )
+        .order_by("-watch_seconds")
+    )
+
+    if limit is not None:
+        queryset = queryset[:limit]
+
+    return [
+        {
+            "title_id": row["title_id"],
+            "title": row["title__name"],
+            "watch_hours": round(
+                (row["watch_seconds"] or 0) / 3600,
+                2
+            ),
+        }
+        for row in queryset
+    ]
