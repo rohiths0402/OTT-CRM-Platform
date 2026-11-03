@@ -1,4 +1,40 @@
-/* Page-specific styles for RolesPage. The module stylesheet supplies shared layout primitives. */
-@import '../roles.css';
 
-.roles-page { min-width: 0; }
+.roles-page {
+  min-width: 0;
+}
+
+.roles-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.roles-toolbar-actions select {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #393429;
+  border-radius: 8px;
+  background: #191814;
+  color: #eeeae1;
+}
+
+.crm-success {
+  margin-bottom: 16px;
+  padding: 12px 15px;
+  border: 1px solid rgba(110, 180, 125, 0.25);
+  border-radius: 8px;
+  background: rgba(60, 130, 75, 0.12);
+  color: #91c99e;
+  font-size: 13px;
+}
+
+@media (max-width: 650px) {
+  .roles-toolbar-actions {
+    width: 100%;
+  }
+
+  .roles-toolbar-actions > * {
+    flex: 1;
+  }
+}

@@ -1,4 +1,220 @@
-/* Component-specific form styles for RolesForm. */
-.crm-modal { box-shadow: 0 20px 70px #0009; }
-.crm-form input:focus, .crm-form select:focus { border-color: #c5a464; }
-.crm-modal-actions button:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Modal backdrop */
+.crm-modal-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(7px);
+}
+
+/* Modal container */
+.crm-modal {
+  width: 100%;
+  max-width: 680px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 28px;
+  border: 1px solid rgba(214, 181, 109, 0.23);
+  border-radius: 18px;
+  background: #10100f;
+  color: #eeeae1;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
+}
+
+/* Heading */
+.crm-modal-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.crm-modal-heading > div {
+  min-width: 0;
+}
+
+.crm-modal-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0;
+  color: #f3eee4;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+}
+
+.crm-modal-heading h2 svg {
+  color: #d6b56d;
+}
+
+.crm-modal-heading p {
+  margin: 9px 0 0;
+  color: #938c7e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Close button */
+.crm-icon-btn {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #343027;
+  border-radius: 9px;
+  background: #191814;
+  color: #aaa18f;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.crm-icon-btn:hover {
+  border-color: #d6b56d;
+  background: #252116;
+  color: #d6b56d;
+}
+
+/* Form grid */
+.crm-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 21px 16px;
+}
+
+.crm-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: #c3bba9;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Inputs */
+.crm-form input,
+.crm-form select {
+  width: 100%;
+  height: 44px;
+  padding: 0 13px;
+  border: 1px solid #393429;
+  border-radius: 9px;
+  outline: none;
+  background: #191814;
+  color: #eeeae1;
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.crm-form input::placeholder {
+  color: #777061;
+}
+
+.crm-form input:focus,
+.crm-form select:focus {
+  border-color: #d6b56d;
+  box-shadow: 0 0 0 3px rgba(214, 181, 109, 0.09);
+}
+
+.crm-form select {
+  cursor: pointer;
+}
+
+.crm-form select option {
+  background: #191814;
+  color: #eeeae1;
+}
+
+/* Error */
+.crm-modal .crm-error {
+  margin-bottom: 20px;
+  padding: 11px 13px;
+  border: 1px solid rgba(220, 90, 90, 0.25);
+  border-radius: 8px;
+  background: rgba(150, 45, 45, 0.12);
+  color: #e99a9a;
+  font-size: 12px;
+}
+
+/* Footer actions */
+.crm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 11px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #29261f;
+}
+
+.crm-modal-actions button {
+  min-height: 43px;
+  padding: 0 20px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.crm-modal-actions .crm-btn:not(.secondary) {
+  border: 1px solid #d6b56d;
+  background: #d6b56d;
+  color: #11100d;
+}
+
+.crm-modal-actions .crm-btn:not(.secondary):hover {
+  background: #e4c783;
+}
+
+.crm-modal-actions .secondary {
+  border: 1px solid #393429;
+  background: #191814;
+  color: #c8c0b1;
+}
+
+.crm-modal-actions .secondary:hover {
+  border-color: #81704a;
+  color: #e8d5a8;
+}
+
+.crm-modal-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .crm-modal-bg {
+    padding: 12px;
+  }
+
+  .crm-modal {
+    padding: 21px;
+    max-height: calc(100vh - 24px);
+  }
+
+  .crm-form {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .crm-modal-heading h2 {
+    font-size: 18px;
+  }
+
+  .crm-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .crm-modal-actions button {
+    width: 100%;
+  }
+}

@@ -93,9 +93,8 @@ export default function Topbar({ onMenuClick }) {
         <div className="topbar-action-wrapper">
           <button
             type="button"
-            className={`topbar-icon-button ${
-              notificationsOpen ? 'topbar-icon-active' : ''
-            }`}
+            className={`topbar-icon-button ${notificationsOpen ? 'topbar-icon-active' : ''
+              }`}
             onClick={() => {
               setNotificationsOpen((previous) => !previous)
               setProfileOpen(false)
@@ -179,28 +178,12 @@ export default function Topbar({ onMenuClick }) {
                 type="button"
                 className="profile-dropdown-item"
                 onClick={() => {
-                  setProfileOpen(false)
+                  setProfileOpen(false);
                   navigate(
                     pathParts[0] === 'super-admin'
-                      ? '/super-admin/settings'
-                      : '/admin/settings'
-                  )
-                }}
-              >
-                <UserRound size={17} />
-                Account settings
-              </button>
-
-              <button
-                type="button"
-                className="profile-dropdown-item"
-                onClick={() => {
-                  setProfileOpen(false)
-                  navigate(
-                    pathParts[0] === 'super-admin'
-                      ? '/super-admin/settings'
-                      : '/admin/settings'
-                  )
+                      ? '/super-admin/preferences'
+                      : '/admin/preferences'
+                  );
                 }}
               >
                 <Settings size={17} />

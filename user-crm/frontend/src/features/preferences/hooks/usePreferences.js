@@ -1,12 +1,51 @@
-import { useEffect, useState } from 'react';
-import { preferencesService } from '../services/preferencesService';
+
+import { useCallback, useState } from 'react';
+import { usePreferencesContext } from '../context/PreferencesContext';
 
 export function usePreferences() {
-  const [data, setData] = useState(null);
+  const {
+    data,
+    update,
+    save: savePreferences,
+    loading,
+    error: loadError,
+  } = usePreferencesContext();
+
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  useEffect(() => { preferencesService.get().then(setData).catch((e) => setError(e?.message || 'Unable to load preferences')); }, []);
-  const update = (section, key, value) => setData((current) => ({ ...current, [section]: { ...current[section], [key]: value } }));
-  const save = async () => { try { await preferencesService.save(data); setMessage('Preferences saved'); setError(''); } catch (e) { setError(e?.message || 'Save failed'); } };
-  return { data, setData, message, error, update, save };
+  const [saving, setSaving] = useState(false);
+
+  const handleUpdate = useCallback((section, key, value) => {
+    update(section, key, value);
+    setMessage('');
+    setError('');
+  }, [update]);
+
+  const save = useCallback(async () => {
+    try {
+      setSaving(true);
+      setMessage('');
+      setError('');
+
+      await savePreferences();
+
+      setMessage('Preferences saved successfully');
+    } catch (err) {
+      setError(
+        err?.message || 'Unable to save preferences'
+      );
+    } finally {
+      setSaving(false);
+    }
+  }, [savePreferences]);
+
+  return {
+    data,
+    message,
+    error: error || loadError,
+    loading,
+    saving,
+    update: handleUpdate,
+    save,
+  };
 }

@@ -1,3 +1,45 @@
-/* Component-specific table styles for RolesTable. */
-.crm-table-wrap { width: 100%; overflow-x: auto; }
-.crm-table th, .crm-table td { vertical-align: middle; }
+
+.crm-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.crm-table th,
+.crm-table td {
+  vertical-align: middle;
+}
+
+.crm-toggle-btn {
+  min-width: 96px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.crm-toggle-btn.deactivate {
+  color: #e5a0a0;
+  background: rgba(190, 70, 70, 0.1);
+  border: 1px solid rgba(190, 70, 70, 0.3);
+}
+
+.crm-toggle-btn.deactivate:hover {
+  background: rgba(190, 70, 70, 0.2);
+}
+
+.crm-toggle-btn.activate {
+  color: #d6b56d;
+  background: rgba(214, 181, 109, 0.1);
+  border: 1px solid rgba(214, 181, 109, 0.3);
+}
+
+.crm-toggle-btn.activate:hover {
+  background: rgba(214, 181, 109, 0.2);
+}
+
+.crm-toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
