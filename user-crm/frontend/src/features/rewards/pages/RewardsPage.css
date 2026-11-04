@@ -1,0 +1,6 @@
+/* Page-specific styles for RewardsPage. The module stylesheet supplies shared layout primitives. */
+@import "../rewards.css";
+
+.rewards-page {
+  min-width: 0;
+}

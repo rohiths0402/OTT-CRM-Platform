@@ -1,0 +1,14 @@
+
+.crm-modal {
+    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.6);
+}
+
+.crm-form input:focus,
+.crm-form select:focus {
+    border-color: #c5a464;
+}
+
+.crm-modal-actions button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}

@@ -1,0 +1,6 @@
+/* Page-specific styles for IdentityVaultPage. The module stylesheet supplies shared layout primitives. */
+@import "../identityVault.css";
+
+.identityVault-page {
+  min-width: 0;
+}

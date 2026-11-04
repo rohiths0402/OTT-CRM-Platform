@@ -1,0 +1,167 @@
+
+.sa-revenue {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sa-revenue-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sa-revenue-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  background: #101010;
+  border: 1px solid #292929;
+  border-radius: 12px;
+}
+
+.sa-revenue-card span,
+.sa-revenue-card small {
+  color: #a69c88;
+  font-size: 12px;
+}
+
+.sa-revenue-card strong {
+  color: #f2d58d;
+  font-size: 23px;
+  overflow-wrap: anywhere;
+}
+
+.sa-revenue-chart {
+  padding: 20px;
+  background: #101010;
+  border: 1px solid #292929;
+  border-radius: 12px;
+}
+
+.sa-revenue-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sa-revenue-heading h4 {
+  margin: 0;
+  color: #f5f1e8;
+  font-size: 15px;
+}
+
+.sa-revenue-heading p,
+.sa-revenue-heading span {
+  color: #a69c88;
+  font-size: 12px;
+}
+
+.sa-revenue-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  min-height: 220px;
+  margin-top: 25px;
+  padding: 15px 0;
+  overflow-x: auto;
+}
+
+.sa-revenue-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  min-width: 65px;
+  height: 210px;
+}
+
+.sa-revenue-bar-value {
+  color: #c5a464;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.sa-revenue-bar {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 36px;
+  height: 150px;
+  overflow: hidden;
+  background: #292929;
+  border-radius: 6px 6px 0 0;
+}
+
+.sa-revenue-bar-subscription {
+  width: 100%;
+  background: #d6b56d;
+}
+
+.sa-revenue-bar-advertising {
+  width: 100%;
+  background: #80602c;
+}
+
+.sa-revenue-month > span {
+  color: #a69c88;
+  font-size: 11px;
+}
+
+.sa-revenue-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.sa-revenue-legend span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a69c88;
+  font-size: 11px;
+}
+
+.sa-revenue-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+
+.sa-legend-subscription {
+  background: #d6b56d;
+}
+
+.sa-legend-advertising {
+  background: #80602c;
+}
+
+.sa-revenue-empty {
+  padding: 35px 0;
+  color: #a69c88;
+  text-align: center;
+}
+
+.sa-revenue-disclaimer {
+  color: #817968;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+@media (max-width: 1000px) {
+  .sa-revenue-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 550px) {
+  .sa-revenue-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sa-revenue-chart {
+    padding: 14px;
+  }
+}
