@@ -18,12 +18,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     updated_at = models.DateTimeField(auto_now=True)
 
     roles = models.ManyToManyField(
-    "roles.Role",
-    through="UserRole",
-    through_fields=("user", "role"),
-    related_name="users",
-    blank=True
-)
+        "roles.Role",
+        through="UserRole",
+        through_fields=("user", "role"),
+        related_name="users",
+        blank=True,
+    )
 
     objects = UserManager()
 
@@ -36,48 +36,35 @@ class User(AbstractBaseUser, PermissionsMixin):
     def assign_role(self, role, assigned_by=None):
 
         UserRole.objects.get_or_create(
-            user=self,
-            role=role,
-            defaults={"assigned_by": assigned_by}
+            user=self, role=role, defaults={"assigned_by": assigned_by}
         )
 
     def has_role(self, role_code):
 
-        return self.roles.filter(
-            code=role_code,
-            is_active=True
-        ).exists()
+        return self.roles.filter(code=role_code, is_active=True).exists()
 
 
 class UserRole(models.Model):
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="user_roles"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_roles"
     )
 
-    role = models.ForeignKey(
-        "roles.Role",
-        on_delete=models.PROTECT
-    )
+    role = models.ForeignKey("roles.Role", on_delete=models.PROTECT)
 
     assigned_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="role_assignments_made"
+        related_name="role_assignments_made",
     )
 
     assigned_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["user", "role"],
-                name="unique_user_role"
-            )
+            models.UniqueConstraint(fields=["user", "role"], name="unique_user_role")
         ]
 
 
@@ -86,7 +73,7 @@ class LoginSession(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="login_sessions"
+        related_name="login_sessions",
     )
 
     refresh_jti = models.CharField(max_length=255, unique=True)
@@ -95,38 +82,26 @@ class LoginSession(models.Model):
 
     user_agent = models.TextField(blank=True)
 
-    ip_address = models.GenericIPAddressField(
-        null=True,
-        blank=True
-    )
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     expires_at = models.DateTimeField()
 
-    revoked_at = models.DateTimeField(
-        null=True,
-        blank=True
-    )
+    revoked_at = models.DateTimeField(null=True, blank=True)
 
 
 class AuditLog(models.Model):
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
     )
 
     action = models.CharField(max_length=100)
 
     details = models.JSONField(default=dict, blank=True)
 
-    ip_address = models.GenericIPAddressField(
-        null=True,
-        blank=True
-    )
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

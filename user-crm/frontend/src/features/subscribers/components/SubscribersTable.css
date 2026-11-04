@@ -1,3 +1,9 @@
 /* Component-specific table styles for SubscribersTable. */
-.crm-table-wrap { width: 100%; overflow-x: auto; }
-.crm-table th, .crm-table td { vertical-align: middle; }
+.crm-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.crm-table th,
+.crm-table td {
+  vertical-align: middle;
+}

@@ -10,10 +10,7 @@ class UserManager(BaseUserManager):
 
         email = self.normalize_email(email).lower()
 
-        user = self.model(
-            email=email,
-            **extra_fields
-        )
+        user = self.model(email=email, **extra_fields)
 
         if password:
             user.set_password(password)
@@ -39,17 +36,12 @@ class UserManager(BaseUserManager):
         if not password:
             raise ValueError("Superuser must have a password")
 
-        user = self.create_user(
-            email=email,
-            password=password,
-            **extra_fields
-        )
+        user = self.create_user(email=email, password=password, **extra_fields)
 
         from apps.roles.models import Role
 
         role, _ = Role.objects.get_or_create(
-            code=Role.SUPER_ADMIN,
-            defaults={"name": "Super Admin"}
+            code=Role.SUPER_ADMIN, defaults={"name": "Super Admin"}
         )
         user.assign_role(role)
         return user

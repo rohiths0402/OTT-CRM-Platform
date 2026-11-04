@@ -14,10 +14,7 @@ class OverviewView(APIView):
 
     def get(self, request):
         try:
-            days = min(
-                max(int(request.query_params.get("days", 30)), 1),
-                365
-            )
+            days = min(max(int(request.query_params.get("days", 30)), 1), 365)
         except (TypeError, ValueError):
             days = 30
 
@@ -28,8 +25,7 @@ class OverviewView(APIView):
         cutoff = timezone.now() - timedelta(hours=24)
 
         telemetry = (
-            StreamingTelemetry.objects
-            .filter(recorded_at__gte=cutoff)
+            StreamingTelemetry.objects.filter(recorded_at__gte=cutoff)
             .order_by("-recorded_at")
             .first()
         )
@@ -40,18 +36,18 @@ class OverviewView(APIView):
             telemetry.concurrent_viewers if telemetry else None
         )
 
-        # Revenue must come from the actual revenue aggregation.
-        # Do not substitute a demo value.
         metrics.setdefault("platform_revenue", None)
 
-        return Response({
-            "period_days": days,
-            "metrics": metrics,
-            "telemetry": {
-                "recorded_at": telemetry.recorded_at if telemetry else None,
-                "status": "available" if telemetry else "no_telemetry"
+        return Response(
+            {
+                "period_days": days,
+                "metrics": metrics,
+                "telemetry": {
+                    "recorded_at": telemetry.recorded_at if telemetry else None,
+                    "status": "available" if telemetry else "no_telemetry",
+                },
             }
-        })
+        )
 
 
 class ContentIntelligenceView(APIView):
@@ -59,17 +55,11 @@ class ContentIntelligenceView(APIView):
 
     def get(self, request):
         try:
-            days = min(
-                max(int(request.query_params.get("days", 30)), 1),
-                365
-            )
+            days = min(max(int(request.query_params.get("days", 30)), 1), 365)
         except (TypeError, ValueError):
             days = 30
 
-        return Response({
-            "period_days": days,
-            "top_titles": top_titles(days)
-        })
+        return Response({"period_days": days, "top_titles": top_titles(days)})
 
 
 class StreamingHealthView(APIView):
@@ -79,25 +69,28 @@ class StreamingHealthView(APIView):
         cutoff = timezone.now() - timedelta(hours=24)
 
         row = (
-            StreamingTelemetry.objects
-            .filter(recorded_at__gte=cutoff)
+            StreamingTelemetry.objects.filter(recorded_at__gte=cutoff)
             .order_by("-recorded_at")
             .first()
         )
 
         if not row:
-            return Response({
-                "status": "no_telemetry",
-                "message": "No streaming telemetry received in the last 24 hours."
-            })
+            return Response(
+                {
+                    "status": "no_telemetry",
+                    "message": "No streaming telemetry received in the last 24 hours.",
+                }
+            )
 
-        return Response({
-            "status": "healthy",
-            "recorded_at": row.recorded_at,
-            "cdn_cache_hit_ratio": row.cdn_cache_hit_ratio,
-            "playback_start_success": row.playback_start_success,
-            "startup_latency_seconds": row.startup_latency_seconds,
-            "playback_failure_rate": row.playback_failure_rate,
-            "concurrent_viewers": row.concurrent_viewers,
-            "provider": row.provider
-        })
+        return Response(
+            {
+                "status": "healthy",
+                "recorded_at": row.recorded_at,
+                "cdn_cache_hit_ratio": row.cdn_cache_hit_ratio,
+                "playback_start_success": row.playback_start_success,
+                "startup_latency_seconds": row.startup_latency_seconds,
+                "playback_failure_rate": row.playback_failure_rate,
+                "concurrent_viewers": row.concurrent_viewers,
+                "provider": row.provider,
+            }
+        )

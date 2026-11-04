@@ -1,9 +1,7 @@
-
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
 from apps.subscribers.models import Subscriber
-
 
 ALLOWED_TRANSITIONS = {
     Subscriber.Status.ACTIVE: {
@@ -27,16 +25,10 @@ def change_subscriber_status(
     valid_statuses = Subscriber.Status.values
 
     if new_status not in valid_statuses:
-        raise ValidationError(
-            f"Invalid subscriber status: {new_status}"
-        )
+        raise ValidationError(f"Invalid subscriber status: {new_status}")
 
     try:
-        subscriber = (
-            Subscriber.objects
-            .select_for_update()
-            .get(pk=subscriber_id)
-        )
+        subscriber = Subscriber.objects.select_for_update().get(pk=subscriber_id)
     except Subscriber.DoesNotExist:
         raise ValidationError("Subscriber does not exist.")
 

@@ -1,8 +1,3 @@
-
-/* ==========================================
-   SUBSCRIBERS PAGE
-========================================== */
-
 .crm-source-value {
   font-size: 13px !important;
   color: #d6b56d !important;
@@ -25,10 +20,6 @@
 .crm-subscriber-actions select {
   min-height: 36px;
 }
-
-/* ==========================================
-   PAGINATION
-========================================== */
 
 .crm-pagination-container {
   display: flex;
@@ -105,10 +96,6 @@
   font-size: 12px;
 }
 
-/* ==========================================
-   EMPTY STATE
-========================================== */
-
 .crm-subscribers-empty {
   display: flex;
   align-items: center;
@@ -146,10 +133,6 @@
   line-height: 1.6;
 }
 
-/* ==========================================
-   FULL PAGE SKELETON
-========================================== */
-
 .crm-skeleton-page {
   animation: crm-skeleton-appear 0.2s ease;
 }
@@ -173,7 +156,7 @@
 .crm-skeleton::after {
   position: absolute;
   inset: 0;
-  content: '';
+  content: "";
   transform: translateX(-100%);
   background: linear-gradient(
     90deg,
@@ -293,10 +276,6 @@
   width: 135px;
   height: 12px;
 }
-
-/* ==========================================
-   RESPONSIVE
-========================================== */
 
 @media (max-width: 760px) {
   .crm-subscribers-toolbar {

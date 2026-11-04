@@ -15,16 +15,43 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=160)),
-                ('body', models.TextField()),
-                ('channel', models.CharField(choices=[('in_app', 'In app'), ('email', 'Email'), ('sms', 'SMS'), ('push', 'Push')], default='in_app', max_length=10)),
-                ('is_read', models.BooleanField(db_index=True, default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('read_at', models.DateTimeField(blank=True, null=True)),
-                ('recipient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=160)),
+                ("body", models.TextField()),
+                (
+                    "channel",
+                    models.CharField(
+                        choices=[
+                            ("in_app", "In app"),
+                            ("email", "Email"),
+                            ("sms", "SMS"),
+                            ("push", "Push"),
+                        ],
+                        default="in_app",
+                        max_length=10,
+                    ),
+                ),
+                ("is_read", models.BooleanField(db_index=True, default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("read_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "recipient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

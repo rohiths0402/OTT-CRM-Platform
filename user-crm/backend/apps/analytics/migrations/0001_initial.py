@@ -7,39 +7,96 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='DailyMetric',
+            name="DailyMetric",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('metric_date', models.DateField(db_index=True)),
-                ('metric_key', models.CharField(db_index=True, max_length=80)),
-                ('dimension', models.CharField(blank=True, db_index=True, default='', max_length=100)),
-                ('value', models.DecimalField(decimal_places=4, default=0, max_digits=20)),
-                ('metadata', models.JSONField(blank=True, default=dict)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("metric_date", models.DateField(db_index=True)),
+                ("metric_key", models.CharField(db_index=True, max_length=80)),
+                (
+                    "dimension",
+                    models.CharField(
+                        blank=True, db_index=True, default="", max_length=100
+                    ),
+                ),
+                (
+                    "value",
+                    models.DecimalField(decimal_places=4, default=0, max_digits=20),
+                ),
+                ("metadata", models.JSONField(blank=True, default=dict)),
             ],
             options={
-                'indexes': [models.Index(fields=['metric_key', 'metric_date'], name='analytics_d_metric__f99f5a_idx')],
-                'constraints': [models.UniqueConstraint(fields=('metric_date', 'metric_key', 'dimension'), name='unique_daily_metric_dimension')],
+                "indexes": [
+                    models.Index(
+                        fields=["metric_key", "metric_date"],
+                        name="analytics_d_metric__f99f5a_idx",
+                    )
+                ],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("metric_date", "metric_key", "dimension"),
+                        name="unique_daily_metric_dimension",
+                    )
+                ],
             },
         ),
         migrations.CreateModel(
-            name='StreamingTelemetry',
+            name="StreamingTelemetry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('recorded_at', models.DateTimeField(db_index=True)),
-                ('cdn_cache_hit_ratio', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('playback_start_success', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('startup_latency_seconds', models.DecimalField(blank=True, decimal_places=3, max_digits=8, null=True)),
-                ('playback_failure_rate', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('concurrent_viewers', models.PositiveIntegerField(default=0)),
-                ('provider', models.CharField(blank=True, max_length=80)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("recorded_at", models.DateTimeField(db_index=True)),
+                (
+                    "cdn_cache_hit_ratio",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "playback_start_success",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                (
+                    "startup_latency_seconds",
+                    models.DecimalField(
+                        blank=True, decimal_places=3, max_digits=8, null=True
+                    ),
+                ),
+                (
+                    "playback_failure_rate",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                ("concurrent_viewers", models.PositiveIntegerField(default=0)),
+                ("provider", models.CharField(blank=True, max_length=80)),
             ],
             options={
-                'indexes': [models.Index(fields=['recorded_at'], name='analytics_s_recorde_611e63_idx')],
+                "indexes": [
+                    models.Index(
+                        fields=["recorded_at"], name="analytics_s_recorde_611e63_idx"
+                    )
+                ],
             },
         ),
     ]

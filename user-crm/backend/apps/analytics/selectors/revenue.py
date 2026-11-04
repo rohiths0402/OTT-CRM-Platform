@@ -1,4 +1,3 @@
-
 from collections import defaultdict
 from decimal import Decimal
 
@@ -11,28 +10,10 @@ from apps.advertising.models import AdEvent
 
 
 def revenue_overview(days=30):
-    """
-    Returns revenue intelligence metrics for the requested period.
 
-    Subscription revenue:
-        Wallet-funded subscription purchases recorded as debit transactions.
-
-    Advertising revenue:
-        Revenue recorded against advertising events.
-
-    Monthly trend:
-        Aggregated in Python to avoid MySQL timezone-table dependencies.
-    """
-
-    # Ensure a valid reporting period.
     days = max(1, min(int(days), 365))
 
     since = timezone.now() - timedelta(days=days)
-
-    # ---------------------------------------------------------
-    # 1. SUBSCRIPTION REVENUE
-    # ---------------------------------------------------------
-
     subscription_transactions = WalletTransaction.objects.filter(
         created_at__gte=since,
         kind=WalletTransaction.Kind.DEBIT,
@@ -47,10 +28,6 @@ def revenue_overview(days=30):
     subscription_total = subscription_summary["total"] or Decimal("0.00")
     subscription_count = subscription_summary["count"] or 0
 
-    # ---------------------------------------------------------
-    # 2. ADVERTISING REVENUE
-    # ---------------------------------------------------------
-
     advertising_events = AdEvent.objects.filter(
         occurred_at__gte=since,
     )
@@ -59,19 +36,9 @@ def revenue_overview(days=30):
         total=Sum("revenue"),
         count=Count("id"),
     )
-
     advertising_total = advertising_summary["total"] or Decimal("0.00")
     advertising_count = advertising_summary["count"] or 0
-
-    # ---------------------------------------------------------
-    # 3. TOTAL RECORDED REVENUE
-    # ---------------------------------------------------------
-
     total_revenue = subscription_total + advertising_total
-
-    # ---------------------------------------------------------
-    # 4. MONTHLY REVENUE TREND
-    # ---------------------------------------------------------
 
     monthly_data = defaultdict(
         lambda: {
@@ -79,8 +46,6 @@ def revenue_overview(days=30):
             "advertising_revenue": Decimal("0.00"),
         }
     )
-
-    # Subscription transactions grouped by month in Python.
     subscription_rows = subscription_transactions.values_list(
         "created_at",
         "amount",
@@ -89,11 +54,8 @@ def revenue_overview(days=30):
     for created_at, amount in subscription_rows:
         month = created_at.strftime("%Y-%m")
 
-        monthly_data[month]["subscription_revenue"] += (
-            amount or Decimal("0.00")
-        )
+        monthly_data[month]["subscription_revenue"] += amount or Decimal("0.00")
 
-    # Advertising events grouped by month in Python.
     advertising_rows = advertising_events.values_list(
         "occurred_at",
         "revenue",
@@ -102,61 +64,35 @@ def revenue_overview(days=30):
     for occurred_at, amount in advertising_rows:
         month = occurred_at.strftime("%Y-%m")
 
-        monthly_data[month]["advertising_revenue"] += (
-            amount or Decimal("0.00")
-        )
+        monthly_data[month]["advertising_revenue"] += amount or Decimal("0.00")
 
     monthly_trend = []
 
     for month in sorted(monthly_data.keys()):
-        subscription_amount = monthly_data[month][
-            "subscription_revenue"
-        ]
+        subscription_amount = monthly_data[month]["subscription_revenue"]
 
-        advertising_amount = monthly_data[month][
-            "advertising_revenue"
-        ]
+        advertising_amount = monthly_data[month]["advertising_revenue"]
 
         monthly_total = subscription_amount + advertising_amount
 
-        monthly_trend.append({
-            "month": month,
-            "subscription_revenue": round(
-                float(subscription_amount), 2
-            ),
-            "advertising_revenue": round(
-                float(advertising_amount), 2
-            ),
-            "total_revenue": round(
-                float(monthly_total), 2
-            ),
-        })
-
-    # ---------------------------------------------------------
-    # 5. API RESPONSE
-    # ---------------------------------------------------------
+        monthly_trend.append(
+            {
+                "month": month,
+                "subscription_revenue": round(float(subscription_amount), 2),
+                "advertising_revenue": round(float(advertising_amount), 2),
+                "total_revenue": round(float(monthly_total), 2),
+            }
+        )
 
     return {
         "period_days": days,
         "currency": "INR",
-
-        "subscription_revenue": round(
-            float(subscription_total), 2
-        ),
-
-        "advertising_revenue": round(
-            float(advertising_total), 2
-        ),
-
-        "total_revenue": round(
-            float(total_revenue), 2
-        ),
-
+        "subscription_revenue": round(float(subscription_total), 2),
+        "advertising_revenue": round(float(advertising_total), 2),
+        "total_revenue": round(float(total_revenue), 2),
         "subscription_transactions": subscription_count,
         "advertising_events": advertising_count,
-
         "monthly_trend": monthly_trend,
-
         "revenue_definitions": {
             "subscription": (
                 "Wallet-funded subscription purchases recorded "

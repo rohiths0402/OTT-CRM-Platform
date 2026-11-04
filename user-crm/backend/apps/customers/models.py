@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.utils import timezone
 from .managers import CustomerManager
 
+
 class Customer(AbstractBaseUser):
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=150)

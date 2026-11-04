@@ -1,4 +1,5 @@
-/* Page-specific styles for ViewingInsightsPage. The module stylesheet supplies shared layout primitives. */
-@import '../viewingInsights.css';
+@import "../viewingInsights.css";
 
-.viewingInsights-page { min-width: 0; }
+.viewingInsights-page {
+  min-width: 0;
+}

@@ -1,8 +1,4 @@
 
-/* ==========================================
-   CONTENT INTELLIGENCE
-   Loop CRM - Black & Champagne Gold
-========================================== */
 
 .sa-content-intelligence {
   width: 100%;
@@ -15,9 +11,6 @@
   box-sizing: border-box;
 }
 
-/* ==========================================
-   HEADER
-========================================== */
 
 .sa-content-header {
   display: flex;
@@ -144,21 +137,12 @@
   color: #777777;
   font-size: 11px;
 }
-
-/* ==========================================
-   MAIN DASHBOARD GRID
-========================================== */
-
 .sa-content-dashboard {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
   gap: 16px;
   align-items: stretch;
 }
-
-/* ==========================================
-   CONTENT LIBRARY
-========================================== */
 
 .sa-content-library {
   display: flex;
@@ -201,10 +185,6 @@
   border-radius: 20px;
   font-size: 11px;
 }
-
-/* ==========================================
-   SEARCH
-========================================== */
 
 .sa-content-search {
   display: flex;
@@ -263,10 +243,6 @@
   cursor: pointer;
   font-size: 19px;
 }
-
-/* ==========================================
-   TITLE LIST
-========================================== */
 
 .sa-content-title-list {
   display: flex;
@@ -377,9 +353,6 @@
   text-align: center;
 }
 
-/* ==========================================
-   SELECTED CONTENT DETAILS
-========================================== */
 
 .sa-content-details {
   display: flex;
@@ -463,7 +436,6 @@
   background: #2b2b2b;
 }
 
-/* Primary metric */
 
 .sa-content-primary-stat {
   display: flex;
@@ -489,7 +461,6 @@
   font-size: 11px;
 }
 
-/* Detail cards */
 
 .sa-content-detail-grid {
   display: grid;
@@ -522,7 +493,6 @@
   overflow-wrap: anywhere;
 }
 
-/* Footer */
 
 .sa-content-detail-footer {
   display: flex;
@@ -540,9 +510,6 @@
   font-weight: 500;
 }
 
-/* ==========================================
-   EMPTY / LOADING / ERROR
-========================================== */
 
 .sa-content-state {
   display: flex;
@@ -631,9 +598,6 @@
   font-size: 12px;
 }
 
-/* ==========================================
-   RESPONSIVE
-========================================== */
 
 @media (max-width: 1000px) {
   .sa-content-dashboard {

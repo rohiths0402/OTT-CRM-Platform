@@ -1,4 +1,6 @@
 /* Page-specific styles for EngagementPage. The module stylesheet supplies shared layout primitives. */
-@import '../engagement.css';
+@import "../engagement.css";
 
-.engagement-page { min-width: 0; }
+.engagement-page {
+  min-width: 0;
+}

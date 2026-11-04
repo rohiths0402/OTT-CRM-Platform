@@ -1,3 +1,11 @@
-/* Component-specific table styles for BroadcastTable. */
-.crm-table-wrap { width: 100%; overflow-x: auto; }
-.crm-table th, .crm-table td { vertical-align: middle; }
+/* Component-specific table styles for BroadcastTable */
+
+.crm-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.crm-table th,
+.crm-table td {
+    vertical-align: middle;
+}

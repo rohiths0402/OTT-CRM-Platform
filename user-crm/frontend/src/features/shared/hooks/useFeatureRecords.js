@@ -1,12 +1,11 @@
-
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
 const PAGE_SIZE = 10;
 
 export function useFeatureRecords(service, { fileName }) {
   const [rows, setRows] = useState([]);
-  const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('All');
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("All");
 
   const [page, setPage] = useState(1);
   const [pageSize] = useState(PAGE_SIZE);
@@ -15,63 +14,63 @@ export function useFeatureRecords(service, { fileName }) {
 
   const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  // Fetch only the requested page from the backend.
-  const load = useCallback(async (pageNumber = page) => {
-    setLoading(true);
-    setError('');
+  const load = useCallback(
+    async (pageNumber = page) => {
+      setLoading(true);
+      setError("");
 
-    try {
-      const response = await service.list({
-        page: pageNumber,
-        page_size: pageSize,
-        search: query.trim(),
-        status: filter === 'All' ? '' : filter,
-      });
+      try {
+        const response = await service.list({
+          page: pageNumber,
+          page_size: pageSize,
+          search: query.trim(),
+          status: filter === "All" ? "" : filter,
+        });
 
-      // Supports standard DRF pagination and a custom response.
-      const results = Array.isArray(response)
-        ? response
-        : response.results || [];
+        const results = Array.isArray(response)
+          ? response
+          : response.results || [];
 
-      const count = Array.isArray(response)
-        ? response.length
-        : Number(response.count ?? response.total_count ?? 0);
+        const count = Array.isArray(response)
+          ? response.length
+          : Number(response.count ?? response.total_count ?? 0);
 
-      setRows(results);
-      setTotalCount(count);
+        setRows(results);
+        setTotalCount(count);
 
-      const pages = Math.max(1, Math.ceil(count / pageSize));
-      setTotalPages(
-        Number(response.total_pages) || pages
-      );
+        const pages = Math.max(1, Math.ceil(count / pageSize));
+        setTotalPages(Number(response.total_pages) || pages);
 
-      setPage(pageNumber);
-    } catch (e) {
-      setError(
-        e?.response?.data?.detail ||
-        e?.message ||
-        'Unable to load subscribers'
-      );
-      setRows([]);
-      setTotalCount(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [service, page, pageSize, query, filter]);
-
-  // Reload when page, search or filter changes.
+        setPage(pageNumber);
+      } catch (e) {
+        setError(
+          e?.response?.data?.detail ||
+            e?.message ||
+            "Unable to load subscribers",
+        );
+        setRows([]);
+        setTotalCount(0);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [service, page, pageSize, query, filter],
+  );
   useEffect(() => {
     load(page);
   }, [page, query, filter]);
 
-  const changePage = useCallback((nextPage) => {
-    setPage((current) => {
-      const target = Math.max(1, Math.min(nextPage, totalPages));
-      return target;
-    });
-  }, [totalPages]);
+  const changePage = useCallback(
+    (nextPage) => {
+      setPage((current) => {
+        const target = Math.max(1, Math.min(nextPage, totalPages));
+        return target;
+      });
+    },
+    [totalPages],
+  );
 
   const handleQueryChange = useCallback((value) => {
     setQuery(value);
@@ -83,22 +82,25 @@ export function useFeatureRecords(service, { fileName }) {
     setPage(1);
   }, []);
 
-  const save = useCallback(async (data) => {
-    try {
-      const result = await service.create(data);
-      await load(1);
-      setPage(1);
-      return result;
-    } catch (e) {
-      setError(e?.message || 'Unable to save record');
-      throw e;
-    }
-  }, [service, load]);
+  const save = useCallback(
+    async (data) => {
+      try {
+        const result = await service.create(data);
+        await load(1);
+        setPage(1);
+        return result;
+      } catch (e) {
+        setError(e?.message || "Unable to save record");
+        throw e;
+      }
+    },
+    [service, load],
+  );
 
   // Export all matching records in batches.
   const exportCsv = useCallback(async () => {
     try {
-      setError('');
+      setError("");
 
       const exportRows = [];
       let exportPage = 1;
@@ -108,7 +110,7 @@ export function useFeatureRecords(service, { fileName }) {
           page: exportPage,
           page_size: 500,
           search: query.trim(),
-          status: filter === 'All' ? '' : filter,
+          status: filter === "All" ? "" : filter,
         });
 
         const results = Array.isArray(response)
@@ -119,9 +121,8 @@ export function useFeatureRecords(service, { fileName }) {
 
         if (
           results.length === 0 ||
-          exportRows.length >= Number(
-            response.count ?? response.total_count ?? exportRows.length
-          )
+          exportRows.length >=
+            Number(response.count ?? response.total_count ?? exportRows.length)
         ) {
           break;
         }
@@ -130,32 +131,30 @@ export function useFeatureRecords(service, { fileName }) {
       }
 
       if (!exportRows.length) {
-        setError('No records available to export.');
+        setError("No records available to export.");
         return;
       }
 
-      const keys = [
-        ...new Set(exportRows.flatMap((row) => Object.keys(row))),
-      ];
+      const keys = [...new Set(exportRows.flatMap((row) => Object.keys(row)))];
 
       const escapeCsv = (value) => {
-        const text = value == null ? '' : String(value);
+        const text = value == null ? "" : String(value);
         return `"${text.replaceAll('"', '""')}"`;
       };
 
       const csv = [
-        keys.map(escapeCsv).join(','),
+        keys.map(escapeCsv).join(","),
         ...exportRows.map((row) =>
-          keys.map((key) => escapeCsv(row[key])).join(',')
+          keys.map((key) => escapeCsv(row[key])).join(","),
         ),
-      ].join('\n');
+      ].join("\n");
 
-      const blob = new Blob(['\uFEFF' + csv], {
-        type: 'text/csv;charset=utf-8;',
+      const blob = new Blob(["\uFEFF" + csv], {
+        type: "text/csv;charset=utf-8;",
       });
 
       const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
+      const anchor = document.createElement("a");
 
       anchor.href = url;
       anchor.download = fileName;
@@ -165,7 +164,7 @@ export function useFeatureRecords(service, { fileName }) {
 
       URL.revokeObjectURL(url);
     } catch (e) {
-      setError(e?.message || 'Unable to export records');
+      setError(e?.message || "Unable to export records");
     }
   }, [service, query, filter, fileName]);
 

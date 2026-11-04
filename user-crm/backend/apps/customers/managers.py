@@ -1,5 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 
+
 class CustomerManager(BaseUserManager):
     use_in_migrations = False
 

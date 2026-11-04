@@ -1,10 +1,4 @@
-
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import LoginPage from "../features/auth/pages/LoginPage";
 import { useAuth } from "../features/auth/context/AuthContext";
@@ -70,12 +64,7 @@ function ProtectedRole({ allowedRoles, children }) {
   const permittedRoles = allowedRoles.map(normalizeRole);
 
   if (!permittedRoles.includes(userRole)) {
-    return (
-      <Navigate
-        to={getRolePath(userRole)}
-        replace
-      />
-    );
+    return <Navigate to={getRolePath(userRole)} replace />;
   }
 
   return children;
@@ -93,37 +82,23 @@ function RoleLanding() {
     return <Navigate to="/login" replace />;
   }
 
-  return (
-    <Navigate
-      to={getRolePath(user.role)}
-      replace
-    />
-  );
+  return <Navigate to={getRolePath(user.role)} replace />;
 }
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Public Routes */}
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
+        <Route path="/login" element={<LoginPage />} />
 
-        <Route
-          path="/"
-          element={<RoleLanding />}
-        />
+        <Route path="/" element={<RoleLanding />} />
 
         {/* ADMIN WORKSPACE */}
         <Route
           path="/admin"
           element={
-            <ProtectedRole
-              allowedRoles={["admin", "super_admin", "analyst"]}
-            >
+            <ProtectedRole allowedRoles={["admin", "super_admin", "analyst"]}>
               <AdminLayout />
             </ProtectedRole>
           }
@@ -147,9 +122,7 @@ export default function AppRoutes() {
         <Route
           path="/super-admin"
           element={
-            <ProtectedRole
-              allowedRoles={["super_admin"]}
-            >
+            <ProtectedRole allowedRoles={["super_admin"]}>
               <AdminLayout />
             </ProtectedRole>
           }
@@ -169,19 +142,14 @@ export default function AppRoutes() {
           <Route path="preferences" element={<PreferencesPage />} />
 
           {/* Employee Registration - Super Admin Only */}
-          <Route
-            path="employees/create"
-            element={<EmployeeCreatePage />}
-          />
+          <Route path="employees/create" element={<EmployeeCreatePage />} />
         </Route>
 
         {/* EMPLOYEE WORKSPACE */}
         <Route
           path="/employee"
           element={
-            <ProtectedRole
-              allowedRoles={["employee", "support"]}
-            >
+            <ProtectedRole allowedRoles={["employee", "support"]}>
               <AdminLayout />
             </ProtectedRole>
           }
@@ -190,11 +158,7 @@ export default function AppRoutes() {
         </Route>
 
         {/* Fallback */}
-        <Route
-          path="*"
-          element={<RoleLanding />}
-        />
-
+        <Route path="*" element={<RoleLanding />} />
       </Routes>
     </BrowserRouter>
   );

@@ -24,25 +24,37 @@ function ensureCollection(key) {
 }
 
 export const mockStore = {
-  list(key) { return ensureCollection(key); },
+  list(key) {
+    return ensureCollection(key);
+  },
   create(key, data) {
     const records = ensureCollection(key);
-    const record = { ...data, id: data?.id || `${key.slice(0, 3).toUpperCase()}-${Date.now()}` };
+    const record = {
+      ...data,
+      id: data?.id || `${key.slice(0, 3).toUpperCase()}-${Date.now()}`,
+    };
     write(key, [record, ...records]);
     return record;
   },
   update(key, id, data) {
     const records = ensureCollection(key);
-    const updated = records.map((record) => String(record.id) === String(id) ? { ...record, ...data } : record);
+    const updated = records.map((record) =>
+      String(record.id) === String(id) ? { ...record, ...data } : record,
+    );
     write(key, updated);
     return updated.find((record) => String(record.id) === String(id)) || null;
   },
   remove(key, id) {
     const records = ensureCollection(key);
-    write(key, records.filter((record) => String(record.id) !== String(id)));
+    write(
+      key,
+      records.filter((record) => String(record.id) !== String(id)),
+    );
     return true;
   },
-  getPreferences() { return read("preferences", defaultPreferences); },
+  getPreferences() {
+    return read("preferences", defaultPreferences);
+  },
   savePreferences(data) {
     const current = this.getPreferences();
     const merged = {
@@ -54,7 +66,13 @@ export const mockStore = {
     };
     return write("preferences", merged);
   },
-  get(key, fallback = []) { return read(key, fallback); },
-  set(key, value) { return write(key, value); },
-  removeKey(key) { localStorage.removeItem(`${PREFIX}${key}`); },
+  get(key, fallback = []) {
+    return read(key, fallback);
+  },
+  set(key, value) {
+    return write(key, value);
+  },
+  removeKey(key) {
+    localStorage.removeItem(`${PREFIX}${key}`);
+  },
 };

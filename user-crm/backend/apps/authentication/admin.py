@@ -9,40 +9,26 @@ class UserAdmin(BaseUserAdmin):
 
     ordering = ("email",)
 
-    list_display = (
-        "email",
-        "full_name",
-        "is_active",
-        "is_staff"
-    )
+    list_display = ("email", "full_name", "is_active", "is_staff")
 
-    search_fields = (
-        "email",
-        "full_name"
-    )
+    search_fields = ("email", "full_name")
 
     fieldsets = (
-        (None, {
-            "fields": ("email", "password")
-        }),
-
-        ("Personal Information", {
-            "fields": ("full_name",)
-        }),
-
-        ("Permissions", {
-            "fields": (
-                "is_active",
-                "is_staff",
-                "is_superuser",
-                "groups",
-                "user_permissions"
-            )
-        }),
-
-        ("Dates", {
-            "fields": ("last_login",)
-        })
+        (None, {"fields": ("email", "password")}),
+        ("Personal Information", {"fields": ("full_name",)}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        ("Dates", {"fields": ("last_login",)}),
     )
 
 

@@ -1,6 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-
 READ_ROLES = {"super_admin", "admin", "analyst", "support"}
 WRITE_ROLES = {"super_admin", "admin"}
 
